@@ -1,0 +1,342 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "full_name": "Admin LUMIÈRE",
+      "email": "admin@lumiere.kz",
+      "password_hash": "$2a$12$SWJsBrQ.7XOtaVwweSEoNe94eKZwI8Yd0ok/q52ut9YuZ1Pii7uxm",
+      "phone": "+77771234567",
+      "avatar_url": null,
+      "role": "admin",
+      "is_active": true,
+      "email_verified": true,
+      "banned": false,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "u2",
+      "full_name": "Айна Бекова",
+      "email": "aina@example.kz",
+      "password_hash": "$2a$12$D9MA5Yz8hlX2j8fUfl4blOBJDGMzK83OxKk8Jyt33Etz9B/ntrDmC",
+      "phone": "+77012345678",
+      "avatar_url": null,
+      "role": "customer",
+      "is_active": true,
+      "email_verified": true,
+      "banned": false,
+      "created_at": "2024-02-15T10:30:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "p1",
+      "name": "Moisturizing Soft Cream",
+      "brand": "La Mer",
+      "price": 98000,
+      "oldPrice": null,
+      "cat": "skincare",
+      "badge": "hit",
+      "stars": "★★★★★",
+      "reviews": 412,
+      "art": "pa-cream",
+      "desc": "Легендарный крем с морскими водорослями. Восстанавливает, увлажняет.",
+      "colors": []
+    },
+    {
+      "id": "p2",
+      "name": "Radiant Creamy Concealer",
+      "brand": "NARS",
+      "price": 24900,
+      "oldPrice": null,
+      "cat": "makeup",
+      "badge": "new",
+      "stars": "★★★★★",
+      "reviews": 891,
+      "art": "pa-serum",
+      "desc": "Перекрывающий консилер с радиантным финишем.",
+      "colors": []
+    },
+    {
+      "id": "p3",
+      "name": "Peony & Blush Suede",
+      "brand": "Jo Malone",
+      "price": 76000,
+      "oldPrice": 89000,
+      "cat": "fragrance",
+      "badge": "sale",
+      "stars": "★★★★☆",
+      "reviews": 234,
+      "art": "pa-perfume",
+      "desc": "Нежный цветочный аромат с нотами пиона и персика. 100 мл.",
+      "colors": []
+    },
+    {
+      "id": "p4",
+      "name": "Magic Cream 60ml",
+      "brand": "Charlotte Tilbury",
+      "price": 58000,
+      "oldPrice": null,
+      "cat": "skincare",
+      "badge": "new",
+      "stars": "★★★★★",
+      "reviews": 677,
+      "art": "pa-cream",
+      "desc": "Шедевральный крем — секрет звёздного макияжа.",
+      "colors": []
+    },
+    {
+      "id": "p5",
+      "name": "Matte Lipstick Ruby Woo",
+      "brand": "MAC",
+      "price": 12900,
+      "oldPrice": null,
+      "cat": "makeup",
+      "badge": null,
+      "stars": "★★★★★",
+      "reviews": 1204,
+      "art": "pa-lipstick",
+      "desc": "Культовый красный матовый оттенок.",
+      "colors": []
+    },
+    {
+      "id": "p6",
+      "name": "Vitamin Enriched Primer",
+      "brand": "Bobbi Brown",
+      "price": 32000,
+      "oldPrice": null,
+      "cat": "skincare",
+      "badge": "new",
+      "stars": "★★★★☆",
+      "reviews": 318,
+      "art": "pa-serum",
+      "desc": "Праймер-база с 5 витаминами. Держит макияж 12 часов.",
+      "colors": []
+    },
+    {
+      "id": "p7",
+      "name": "Génifique Youth Activator",
+      "brand": "Lancôme",
+      "price": 86000,
+      "oldPrice": 98000,
+      "cat": "skincare",
+      "badge": "sale",
+      "stars": "★★★★★",
+      "reviews": 543,
+      "art": "pa-serum",
+      "desc": "Сыворотка-бустер с пробиотиками. Результат через 7 дней.",
+      "colors": []
+    },
+    {
+      "id": "p8",
+      "name": "Airbrush Flawless Palette",
+      "brand": "Charlotte Tilbury",
+      "price": 46000,
+      "oldPrice": null,
+      "cat": "makeup",
+      "badge": null,
+      "stars": "★★★★★",
+      "reviews": 287,
+      "art": "pa-palette",
+      "desc": "Палетка для безупречного макияжа.",
+      "colors": []
+    },
+    {
+      "id": "p9",
+      "name": "Sauvage Elixir 60ml",
+      "brand": "Dior",
+      "price": 94000,
+      "oldPrice": null,
+      "cat": "fragrance",
+      "badge": "hit",
+      "stars": "★★★★★",
+      "reviews": 756,
+      "art": "pa-perfume",
+      "desc": "Мощный элексир с нотами перца и амброксана.",
+      "colors": []
+    },
+    {
+      "id": "p10",
+      "name": "Firming Sleeping Mask",
+      "brand": "Sulwhasoo",
+      "price": 44000,
+      "oldPrice": null,
+      "cat": "skincare",
+      "badge": "new",
+      "stars": "★★★★☆",
+      "reviews": 189,
+      "art": "pa-mask",
+      "desc": "Ночная маска с женьшенем.",
+      "colors": []
+    },
+    {
+      "id": "p11",
+      "name": "Rosehip Oil 30ml",
+      "brand": "The Ordinary",
+      "price": 7900,
+      "oldPrice": 12000,
+      "cat": "body",
+      "badge": "sale",
+      "stars": "★★★★☆",
+      "reviews": 423,
+      "art": "pa-oil",
+      "desc": "Питательное масло шиповника холодного отжима.",
+      "colors": []
+    },
+    {
+      "id": "p12",
+      "name": "Cheek to Chic Blush",
+      "brand": "Charlotte Tilbury",
+      "price": 28000,
+      "oldPrice": null,
+      "cat": "makeup",
+      "badge": null,
+      "stars": "★★★★★",
+      "reviews": 312,
+      "art": "pa-blush",
+      "desc": "Двойные румяна с атласным финишем.",
+      "colors": []
+    }
+  ],
+  "stock": {
+    "p1": 24,
+    "p2": 8,
+    "p3": 15,
+    "p4": 32,
+    "p5": 67,
+    "p6": 19,
+    "p7": 11,
+    "p8": 43,
+    "p9": 5,
+    "p10": 28,
+    "p11": 3,
+    "p12": 51
+  },
+  "addresses": [
+    {
+      "id": "a1",
+      "user_id": "u2",
+      "label": "Дом",
+      "recipient_name": "Айна Бекова",
+      "recipient_phone": "+77012345678",
+      "country": "Казахстан",
+      "city": "Алматы",
+      "street": "ул. Абая, 10",
+      "apartment": "кв. 25",
+      "postal_code": "050000",
+      "delivery_notes": "",
+      "is_default": true,
+      "created_at": "2024-02-15T10:30:00Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord-001",
+      "user_id": "u2",
+      "date": "2026-03-01T10:15:00Z",
+      "total": 122900,
+      "status": "delivered",
+      "track": "KZ123456789",
+      "address": "г. Алматы, ул. Абая, 10, кв. 25",
+      "items": [
+        {
+          "name": "Moisturizing Soft Cream",
+          "qty": 1,
+          "price": 98000
+        },
+        {
+          "name": "Matte Lipstick Ruby Woo",
+          "qty": 2,
+          "price": 12900
+        }
+      ]
+    },
+    {
+      "id": "ord-002",
+      "user_id": "u2",
+      "date": "2026-03-07T14:30:00Z",
+      "total": 76000,
+      "status": "in_transit",
+      "track": "KZ987654321",
+      "address": "г. Алматы, ул. Абая, 10, кв. 25",
+      "items": [
+        {
+          "name": "Peony & Blush Suede",
+          "qty": 1,
+          "price": 76000
+        }
+      ]
+    },
+    {
+      "id": "ord-003",
+      "user_id": "u1",
+      "date": "2026-03-08T09:00:00Z",
+      "total": 58000,
+      "status": "processing",
+      "track": "",
+      "address": "г. Астана, пр. Республики, 1",
+      "items": [
+        {
+          "name": "Magic Cream 60ml",
+          "qty": 1,
+          "price": 58000
+        }
+      ]
+    },
+    {
+      "id": "ord-004",
+      "user_id": "u2",
+      "date": "2026-03-09T16:45:00Z",
+      "total": 24900,
+      "status": "confirmed",
+      "track": "",
+      "address": "г. Алматы, ул. Абая, 10, кв. 25",
+      "items": [
+        {
+          "name": "Radiant Creamy Concealer",
+          "qty": 1,
+          "price": 24900
+        }
+      ]
+    },
+    {
+      "id": "ord-005",
+      "user_id": "u1",
+      "date": "2026-03-09T20:10:00Z",
+      "total": 94000,
+      "status": "processing",
+      "track": "",
+      "address": "г. Астана, пр. Республики, 1",
+      "items": [
+        {
+          "name": "Sauvage Elixir 60ml",
+          "qty": 1,
+          "price": 94000
+        }
+      ]
+    }
+  ],
+  "wishlist": {},
+  "notifications": [
+    {
+      "id": "n1",
+      "type": "warning",
+      "msg": "Остаток товара \"Rosehip Oil 30ml\" менее 5 шт.",
+      "time": "2026-03-10T00:30:00Z",
+      "read": false
+    },
+    {
+      "id": "n2",
+      "type": "info",
+      "msg": "Новый пользователь зарегистрирован: aina@example.kz",
+      "time": "2026-03-09T22:00:00Z",
+      "read": false
+    },
+    {
+      "id": "n3",
+      "type": "success",
+      "msg": "Заказ #ord-001 успешно доставлен",
+      "time": "2026-03-09T18:05:00Z",
+      "read": true
+    }
+  ]
+}
