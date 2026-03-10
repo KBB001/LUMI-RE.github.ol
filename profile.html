@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Мой профиль — LUMIÈRE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="site.css"/>
+<style>
+:root{--sidebar:260px}
+body{background:var(--beige);min-height:100vh}
+
+/* ── LOGIN WALL ──────────────────────────── */
+.lw{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;text-align:center}
+.lw h2{font-family:var(--font-s);font-size:40px;font-weight:300;color:var(--near-black);margin-bottom:8px}
+.lw p{font-size:14px;color:var(--muted);margin-bottom:28px}
+.lw-box{background:var(--cream);border-radius:20px;padding:32px;width:min(400px,100%);box-shadow:var(--shadow)}
+.lw-err{background:rgba(200,50,50,.1);color:#c04040;border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:12px;display:none}
+.lw-err.show{display:block}
+.g{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.inp{background:var(--beige);border:1.5px solid transparent;border-radius:12px;padding:12px 14px;font-size:14px;font-family:var(--font-u);color:var(--near-black);outline:none;width:100%;transition:.2s}
+.inp:focus{border-color:var(--rose);background:#fff}
+.btn-b{background:var(--near-black);color:var(--cream);border:none;border-radius:12px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;margin-bottom:10px}
+.btn-b:hover{background:var(--dark-brown)}
+.btn-o{background:none;border:1.5px solid var(--beige-dk);border-radius:12px;padding:12px;font-size:13px;font-weight:500;cursor:pointer;width:100%;color:var(--near-black);transition:all .2s;text-decoration:none;display:block;text-align:center}
+.btn-o:hover{background:var(--near-black);color:var(--cream);border-color:var(--near-black)}
+.demo-hint{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6}
+
+/* ── PROFILE LAYOUT ─────────────────────── */
+.pl{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh;max-width:1200px;margin:0 auto;padding-top:70px}
+
+/* Sidebar */
+.ps{background:var(--cream);border-right:1px solid rgba(90,50,30,.08);display:flex;flex-direction:column;position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto}
+.ps-header{padding:24px 24px 20px;border-bottom:1px solid var(--beige)}
+.ps-ava{width:64px;height:64px;border-radius:50%;background:var(--near-black);display:flex;align-items:center;justify-content:center;font-family:var(--font-s);font-size:26px;color:var(--cream);margin-bottom:12px;overflow:hidden;flex-shrink:0}
+.ps-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ps-name{font-family:var(--font-s);font-size:18px;font-weight:600;color:var(--near-black)}
+.ps-email{font-size:11px;color:var(--muted);margin-top:2px}
+.ps-badge{display:inline-block;background:var(--near-black);color:var(--cream);font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:20px;margin-top:6px}
+.ps-nav{padding:12px 0;flex:1}
+.ps-item{display:flex;align-items:center;gap:12px;padding:11px 24px;font-size:13px;font-weight:500;color:var(--mid);cursor:pointer;border-left:3px solid transparent;transition:all .2s;text-decoration:none}
+.ps-item:hover{background:var(--beige);color:var(--near-black)}
+.ps-item.active{border-left-color:var(--near-black);background:var(--beige);color:var(--near-black);font-weight:600}
+.ps-item .badge{background:var(--rose);color:#fff;border-radius:20px;font-size:9px;padding:2px 7px;margin-left:auto}
+.ps-sep{height:1px;background:var(--beige);margin:6px 24px}
+.ps-footer{padding:16px 24px}
+.ps-logout{background:none;border:1.5px solid rgba(200,50,50,.25);border-radius:10px;padding:9px;font-size:12px;font-weight:600;color:#c04040;cursor:pointer;width:100%;transition:all .2s}
+.ps-logout:hover{background:rgba(200,50,50,.08)}
+
+/* Main */
+.pm{padding:36px 40px;min-width:0}
+.tab{display:none}.tab.active{display:block}
+.tab-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.tab-title{font-family:var(--font-s);font-size:30px;font-weight:600;color:var(--near-black)}
+.card{background:var(--cream);border-radius:18px;padding:24px;box-shadow:var(--shadow);margin-bottom:18px}
+.card-title{font-family:var(--font-s);font-size:17px;font-weight:600;color:var(--near-black);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+
+/* Avatar edit */
+.ava-edit{display:flex;align-items:center;gap:20px;margin-bottom:22px}
+.ava-lg{width:80px;height:80px;border-radius:50%;background:var(--near-black);display:flex;align-items:center;justify-content:center;font-family:var(--font-s);font-size:32px;color:var(--cream);overflow:hidden;flex-shrink:0;cursor:pointer;position:relative}
+.ava-lg img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ava-lg-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:20px;opacity:0;transition:.2s;border-radius:50%}
+.ava-lg:hover .ava-lg-overlay{opacity:1}
+.ava-info p{font-size:13px;color:var(--mid);line-height:1.6}
+.btn-sm{background:var(--beige);border:1.5px solid var(--beige-dk);border-radius:10px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;color:var(--near-black);transition:all .2s}
+.btn-sm:hover{background:var(--near-black);color:var(--cream);border-color:var(--near-black)}
+
+/* Form grid */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg .g{margin:0}.fg .g.full{grid-column:1/-1}
+.save-row{display:flex;gap:10px;margin-top:16px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.st{background:var(--beige);border-radius:14px;padding:16px;text-align:center}
+.st-num{font-family:var(--font-s);font-size:26px;font-weight:600;color:var(--near-black)}
+.st-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* Orders */
+.order-card{background:var(--beige);border-radius:14px;padding:16px 20px;margin-bottom:10px;display:flex;flex-direction:column;gap:10px}
+.order-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.order-id{font-size:12px;font-weight:700;color:var(--near-black)}
+.order-date{font-size:11px;color:var(--muted)}
+.status{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.5px}
+.s-processing{background:#fff3e0;color:#c06010}
+.s-transit{background:#e3f0ff;color:#1060a0}
+.s-delivered{background:#e0f0e8;color:#2a7040}
+.s-cancelled{background:#ffe0e0;color:#c04040}
+.track-row{display:flex;align-items:center;gap:10px;background:var(--cream);border-radius:10px;padding:10px 14px;font-size:12px}
+.track-num{font-weight:700;color:var(--near-black);flex:1}
+.track-copy{background:none;border:1.5px solid var(--beige-dk);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .2s}
+.track-copy:hover{background:var(--near-black);color:var(--cream);border-color:var(--near-black)}
+.order-items{font-size:12px;color:var(--mid);line-height:1.7}
+.order-bottom{display:flex;align-items:center;justify-content:space-between}
+.order-total{font-family:var(--font-s);font-size:22px;font-weight:600;color:var(--near-black)}
+.order-actions{display:flex;gap:8px}
+.btn-repeat{background:var(--near-black);color:var(--cream);border:none;border-radius:9px;padding:7px 14px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-repeat:hover{background:var(--dark-brown)}
+.btn-receipt{background:none;border:1.5px solid var(--beige-dk);border-radius:9px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--mid);transition:all .2s}
+.btn-receipt:hover{border-color:var(--near-black);color:var(--near-black)}
+/* Progress bar */
+.order-progress{display:flex;align-items:center;gap:0;margin:4px 0}
+.op-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.op-step:not(:last-child)::after{content:'';position:absolute;top:10px;left:50%;width:100%;height:2px;background:var(--beige-dk);z-index:0}
+.op-step.done::after{background:var(--near-black)}
+.op-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--beige-dk);background:var(--cream);z-index:1;position:relative;font-size:9px;display:flex;align-items:center;justify-content:center}
+.op-step.done .op-dot{background:var(--near-black);border-color:var(--near-black);color:var(--cream)}
+.op-step.active .op-dot{background:var(--rose);border-color:var(--rose);color:#fff}
+.op-lbl{font-size:9px;color:var(--muted);margin-top:4px;text-align:center}
+.op-step.done .op-lbl,.op-step.active .op-lbl{color:var(--near-black);font-weight:600}
+
+/* Wishlist */
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.wl-card{background:var(--beige);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative}
+.wl-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.wl-img{height:110px;display:flex;align-items:center;justify-content:center;font-size:32px;background:linear-gradient(135deg,var(--warm-pink),var(--beige-dk))}
+.wl-remove{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.85);border:none;border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.wl-remove:hover{background:#c04040;color:#fff}
+.wl-body{padding:10px 12px}
+.wl-brand{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.wl-name{font-size:12px;font-weight:500;color:var(--near-black);margin:3px 0;line-height:1.3}
+.wl-price{font-family:var(--font-s);font-size:16px;font-weight:600;color:var(--near-black)}
+.wl-add{background:var(--near-black);color:var(--cream);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;width:100%;margin-top:8px;transition:all .2s}
+.wl-add:hover{background:var(--dark-brown)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:48px;margin-bottom:16px}
+.empty-state h3{font-family:var(--font-s);font-size:22px;font-weight:400;margin-bottom:8px;color:var(--near-black)}
+.empty-state p{font-size:13px;line-height:1.6}
+
+/* Address */
+.addr-list{display:flex;flex-direction:column;gap:10px}
+.addr-card{background:var(--beige);border-radius:14px;padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border:2px solid transparent;transition:.2s}
+.addr-card.default{border-color:var(--near-black)}
+.addr-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.addr-def-pill{background:var(--near-black);color:var(--cream);font-size:9px;padding:2px 8px;border-radius:10px}
+.addr-info p{font-size:13px;color:var(--near-black);line-height:1.6}
+.addr-actions{display:flex;gap:6px;flex-shrink:0}
+.addr-btn{background:none;border:1.5px solid var(--beige-dk);border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;color:var(--mid);transition:all .2s}
+.addr-btn:hover{background:var(--near-black);color:var(--cream);border-color:var(--near-black)}
+.addr-btn.del:hover{background:#c04040;border-color:#c04040}
+
+/* Security */
+.sec-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--beige);gap:12px}
+.sec-row:last-child{border:none}
+.sec-left p{font-size:14px;font-weight:500;color:var(--near-black)}
+.sec-left span{font-size:11px;color:var(--muted)}
+.toggle-sw{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-sw .slider{position:absolute;inset:0;background:var(--beige-dk);border-radius:24px;cursor:pointer;transition:.3s}
+.toggle-sw input:checked+.slider{background:var(--near-black)}
+.toggle-sw .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;left:3px;top:3px;transition:.3s}
+.toggle-sw input:checked+.slider::before{transform:translateX(20px)}
+.soc-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--beige)}
+.soc-row:last-child{border:none}
+.soc-icon{width:36px;height:36px;border-radius:10px;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.soc-name{font-size:13px;font-weight:500;color:var(--near-black);flex:1}
+.soc-status{font-size:11px;color:var(--muted)}
+.danger-zone{border:2px solid rgba(200,50,50,.2);border-radius:14px;padding:16px 20px}
+.danger-zone h4{font-size:13px;font-weight:600;color:#c04040;margin-bottom:12px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(30,15,5,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px)}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--cream);border-radius:20px;padding:28px;width:min(520px,100%);box-shadow:0 32px 80px rgba(30,15,5,.25)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h3{font-family:var(--font-s);font-size:22px;font-weight:600}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+
+/* Toast */
+.tr{position:fixed;bottom:28px;right:28px;z-index:3000;display:flex;flex-direction:column;gap:8px}
+.tk{background:var(--near-black);color:var(--cream);padding:11px 18px;border-radius:12px;font-size:13px;display:flex;align-items:center;gap:10px;animation:si .3s ease;min-width:200px;box-shadow:var(--shadow)}
+@keyframes si{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+@media(max-width:768px){
+  .pl{grid-template-columns:1fr;padding-top:64px}
+  .ps{position:fixed;left:-280px;top:0;bottom:0;z-index:800;width:280px;transition:left .3s;height:auto;overflow-y:auto}
+  .ps.open{left:0}
+  .pm{padding:20px 16px}
+  .fg{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .tab-head{flex-wrap:wrap;gap:10px}
+  .tab-title{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div class="tr" id="tr"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar scrolled" style="position:fixed;top:0;left:0;right:0;z-index:700">
+  <div class="nav-inner">
+    <button id="mbMenuBtn" class="burger" aria-label="Меню" style="display:none"><span></span><span></span><span></span></button>
+    <a href="index.html" class="nav-logo">LUMIÈRE</a>
+    <div class="nav-actions">
+      <a href="index.html" class="nav-icon-btn" title="Магазин">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+      <a href="admin.html" class="nav-icon-btn" id="adminLink" style="display:none" title="Админ-панель">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOGIN WALL ═══════════════════════════ -->
+<div class="lw" id="loginWall">
+  <h2>Войдите в аккаунт</h2>
+  <p>Чтобы просматривать профиль и заказы</p>
+  <div class="lw-box">
+    <div class="lw-err" id="lwErr"></div>
+    <div class="g"><label class="lbl">Email</label><input type="email" class="inp" id="lwEmail" placeholder="ваш@email.com"/></div>
+    <div class="g"><label class="lbl">Пароль</label><input type="password" class="inp" id="lwPass" placeholder="••••••••"/></div>
+    <br/>
+    <button class="btn-b" onclick="doLogin()">Войти</button>
+    <a href="register.html" class="btn-o">Создать аккаунт →</a>
+    <p class="demo-hint">Демо: <strong>aina@example.kz</strong> / <strong>customer123</strong><br/>Или: <strong>admin@lumiere.kz</strong> / <strong>admin123</strong></p>
+  </div>
+</div>
+
+<!-- ═══ PROFILE LAYOUT ══════════════════════ -->
+<div class="pl" id="profileLayout" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="ps" id="sidebar">
+    <div class="ps-header">
+      <div class="ps-ava" id="sideAva" onclick="switchTab('tab-profile',0)"><span id="sideAvaLetter">A</span></div>
+      <div class="ps-name" id="sideName">—</div>
+      <div class="ps-email" id="sideEmail">—</div>
+      <div class="ps-badge" id="sideBadge">CUSTOMER</div>
+    </div>
+    <nav class="ps-nav">
+      <a class="ps-item active" onclick="switchTab('tab-profile',0);return false" href="#">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Личные данные
+      </a>
+      <a class="ps-item" onclick="switchTab('tab-orders',1);return false" href="#">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Мои заказы
+        <span class="badge" id="ordersBadge" style="display:none">0</span>
+      </a>
+      <a class="ps-item" onclick="switchTab('tab-wishlist',2);return false" href="#">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Избранное
+        <span class="badge" id="wishBadge" style="display:none">0</span>
+      </a>
+      <a class="ps-item" onclick="switchTab('tab-addresses',3);return false" href="#">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Адресная книга
+      </a>
+      <div class="ps-sep"></div>
+      <a class="ps-item" onclick="switchTab('tab-security',4);return false" href="#">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Настройки
+      </a>
+    </nav>
+    <div class="ps-footer">
+      <button class="ps-logout" onclick="doLogout()">Выйти из аккаунта</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="pm">
+
+    <!-- ─── TAB 1: ЛИЧНЫЕ ДАННЫЕ ─── -->
+    <div class="tab active" id="tab-profile">
+      <div class="tab-head">
+        <div class="tab-title">Личные данные</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="st"><div class="st-num" id="stOrders">0</div><div class="st-lbl">Заказов</div></div>
+        <div class="st"><div class="st-num" id="stSpent">₸ 0</div><div class="st-lbl">Потрачено</div></div>
+        <div class="st"><div class="st-num" id="stWish">0</div><div class="st-lbl">В избранном</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Профиль</div>
+        <div class="ava-edit">
+          <div class="ava-lg" id="avaLg" onclick="changeAvatar()">
+            <span id="avaLetter">A</span>
+            <div class="ava-lg-overlay">📷</div>
+          </div>
+          <div class="ava-info">
+            <p><strong>Фото профиля</strong></p>
+            <p>Нажмите на аватар, чтобы изменить</p>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="g full"><label class="lbl">ФИО</label><input type="text" class="inp" id="pName" placeholder="Имя Фамилия"/></div>
+          <div class="g"><label class="lbl">Email</label><input type="email" class="inp" id="pEmail" readonly style="opacity:.65"/></div>
+          <div class="g"><label class="lbl">Телефон</label><input type="tel" class="inp" id="pPhone" placeholder="+7 (7xx) xxx-xx-xx"/></div>
+          <div class="g full"><label class="lbl">URL аватара</label><input type="url" class="inp" id="pAvatar" placeholder="https://..."/></div>
+        </div>
+        <div class="save-row">
+          <button class="btn-b" style="width:auto;padding:10px 24px" onclick="saveProfile()">Сохранить</button>
+          <button class="btn-o" style="width:auto;padding:9px 20px" onclick="loadProfile()">Отмена</button>
+        </div>
+      </div>
+
+      <div class="card" id="emailVerifyCard" style="display:none">
+        <div class="card-title">📧 Подтверждение email</div>
+        <p style="font-size:13px;color:var(--mid);margin-bottom:14px">Ваш email ещё не подтверждён. Подтвердите для получения уведомлений о заказах.</p>
+        <button class="btn-sm" onclick="toast('📧 Письмо отправлено на ' + currentUser.email)">Отправить письмо</button>
+      </div>
+    </div>
+
+    <!-- ─── TAB 2: МОИ ЗАКАЗЫ ─── -->
+    <div class="tab" id="tab-orders">
+      <div class="tab-head">
+        <div class="tab-title">Мои заказы</div>
+        <select class="inp" style="width:auto;padding:8px 14px;font-size:12px" onchange="filterOrders(this.value)">
+          <option value="all">Все заказы</option>
+          <option value="processing">В обработке</option>
+          <option value="transit">В пути</option>
+          <option value="delivered">Доставлено</option>
+        </select>
+      </div>
+      <div id="ordersContainer"></div>
+    </div>
+
+    <!-- ─── TAB 3: ИЗБРАННОЕ ─── -->
+    <div class="tab" id="tab-wishlist">
+      <div class="tab-head">
+        <div class="tab-title">Избранное</div>
+        <span id="wishCount" style="font-size:13px;color:var(--muted)"></span>
+      </div>
+      <div id="wishlistGrid" class="wl-grid"></div>
+    </div>
+
+    <!-- ─── TAB 4: АДРЕСА ─── -->
+    <div class="tab" id="tab-addresses">
+      <div class="tab-head">
+        <div class="tab-title">Адресная книга</div>
+        <button class="btn-sm" onclick="openAddrModal(null)">+ Добавить адрес</button>
+      </div>
+      <div class="card">
+        <div class="addr-list" id="addrList"></div>
+      </div>
+    </div>
+
+    <!-- ─── TAB 5: НАСТРОЙКИ ─── -->
+    <div class="tab" id="tab-security">
+      <div class="tab-head"><div class="tab-title">Настройки</div></div>
+
+      <div class="card">
+        <div class="card-title">🔒 Безопасность</div>
+        <div class="sec-row">
+          <div class="sec-left"><p>Пароль</p><span>Изменить пароль аккаунта</span></div>
+          <button class="btn-sm" onclick="openPassModal()">Изменить</button>
+        </div>
+        <div class="sec-row">
+          <div class="sec-left"><p>Двухфакторная аутентификация</p><span>SMS-код при входе</span></div>
+          <label class="toggle-sw"><input type="checkbox" id="tog2fa" onchange="toast(this.checked?'2FA включена':'2FA отключена')"/><span class="slider"></span></label>
+        </div>
+        <div class="sec-row">
+          <div class="sec-left"><p>Уведомления о входе</p><span>Email при новом входе в аккаунт</span></div>
+          <label class="toggle-sw"><input type="checkbox" id="togEmail" checked onchange="toast(this.checked?'Уведомления включены':'Уведомления отключены')"/><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📬 Подписки</div>
+        <div class="sec-row">
+          <div class="sec-left"><p>Новинки и коллекции</p><span>Первые узнавай о новых поступлениях</span></div>
+          <label class="toggle-sw"><input type="checkbox" id="togNewArrivals" checked/><span class="slider"></span></label>
+        </div>
+        <div class="sec-row">
+          <div class="sec-left"><p>Скидки и акции</p><span>Специальные предложения и промокоды</span></div>
+          <label class="toggle-sw"><input type="checkbox" id="togSales" checked/><span class="slider"></span></label>
+        </div>
+        <div class="sec-row">
+          <div class="sec-left"><p>Статус заказов</p><span>Уведомления о доставке (SMS)</span></div>
+          <label class="toggle-sw"><input type="checkbox" id="togOrders" checked/><span class="slider"></span></label>
+        </div>
+        <div style="margin-top:14px">
+          <button class="btn-sm" onclick="toast('Настройки подписок сохранены ✓')">Сохранить настройки</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔗 Социальные сети</div>
+        <div class="soc-row"><span class="soc-icon">🇬</span><div><div class="soc-name">Google</div><div class="soc-status">Не привязан</div></div><button class="btn-sm" onclick="toast('Google OAuth — требует бэкенд')">Привязать</button></div>
+        <div class="soc-row"><span class="soc-icon">📘</span><div><div class="soc-name">ВКонтакте</div><div class="soc-status">Не привязан</div></div><button class="btn-sm" onclick="toast('VK OAuth — требует бэкенд')">Привязать</button></div>
+        <div class="soc-row"><span class="soc-icon">✈️</span><div><div class="soc-name">Telegram</div><div class="soc-status">Не привязан</div></div><button class="btn-sm" onclick="toast('Telegram Login Widget — требует бэкенд')">Привязать</button></div>
+      </div>
+
+      <div class="danger-zone">
+        <h4>⚠️ Опасная зона</h4>
+        <div class="sec-row">
+          <div class="sec-left"><p>Удалить аккаунт</p><span>Все данные будут стёрты безвозвратно</span></div>
+          <button class="btn-sm" style="border-color:rgba(200,50,50,.3);color:#c04040" onclick="confirmDelete()">Удалить</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ─── MODAL: Адрес ─── -->
+<div class="modal-bg" id="addrModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="addrModalTitle">Новый адрес</h3><button class="modal-close" onclick="closeAddrModal()">✕</button></div>
+    <input type="hidden" id="aId"/>
+    <div class="fg" style="margin-bottom:14px">
+      <div class="g full"><label class="lbl">Метка</label><input type="text" class="inp" id="aLabel" placeholder="Дом / Работа"/></div>
+      <div class="g"><label class="lbl">Получатель *</label><input type="text" class="inp" id="aName" placeholder="Имя Фамилия"/></div>
+      <div class="g"><label class="lbl">Телефон</label><input type="tel" class="inp" id="aPhone" placeholder="+7 (777) 000-00-00"/></div>
+      <div class="g"><label class="lbl">Город *</label><input type="text" class="inp" id="aCity" placeholder="Алматы"/></div>
+      <div class="g"><label class="lbl">Улица и дом *</label><input type="text" class="inp" id="aStreet" placeholder="ул. Абая, 10"/></div>
+      <div class="g"><label class="lbl">Квартира/офис</label><input type="text" class="inp" id="aApt" placeholder="кв. 25"/></div>
+      <div class="g"><label class="lbl">Индекс</label><input type="text" class="inp" id="aPostal" placeholder="050000"/></div>
+      <div class="g full"><label class="lbl">Инструкции курьеру</label><input type="text" class="inp" id="aNotes" placeholder="Код домофона, этаж…"/></div>
+      <div class="g full" style="flex-direction:row;align-items:center;gap:10px">
+        <input type="checkbox" id="aDefault" style="accent-color:var(--near-black);width:16px;height:16px"/>
+        <label for="aDefault" style="font-size:13px;cursor:pointer">Сделать основным адресом</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-b" style="width:auto;flex:1" onclick="saveAddrModal()">Сохранить</button>
+      <button class="btn-o" style="flex:1" onclick="closeAddrModal()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL: Пароль ─── -->
+<div class="modal-bg" id="passModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-head"><h3>Изменить пароль</h3><button class="modal-close" onclick="closePassModal()">✕</button></div>
+    <div class="g"><label class="lbl">Текущий пароль</label><input type="password" class="inp" id="passOld" placeholder="••••••••"/></div>
+    <div class="g"><label class="lbl">Новый пароль</label><input type="password" class="inp" id="passNew" placeholder="Минимум 6 символов"/></div>
+    <div class="g" style="margin-bottom:16px"><label class="lbl">Повторите новый пароль</label><input type="password" class="inp" id="passNew2" placeholder="Ещё раз…"/></div>
+    <div class="lw-err" id="passErr"></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn-b" style="flex:1" onclick="changePassword()">Сохранить</button>
+      <button class="btn-o" style="flex:1" onclick="closePassModal()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<script src="db.js"></script>
+<script>
+'use strict';
+let currentUser = null;
+
+// ── Init ────────────────────────────────
+function init(){
+  currentUser = getCurrentUser();
+  if(!currentUser){
+    document.getElementById('loginWall').style.display='flex';
+    document.getElementById('profileLayout').style.display='none';
+  } else {
+    document.getElementById('loginWall').style.display='none';
+    document.getElementById('profileLayout').style.display='grid';
+    if(currentUser.role==='admin') document.getElementById('adminLink').style.display='flex';
+    loadProfile();
+    renderStats();
+    renderOrders();
+    renderWishlist();
+    renderAddresses();
+    // Check mobile nav btn
+    updateMobBtn();
+  }
+}
+
+function updateMobBtn(){
+  const btn=document.getElementById('mbMenuBtn');
+  if(window.innerWidth<=768){ btn.style.display='flex'; btn.onclick=()=>document.getElementById('sidebar').classList.toggle('open'); }
+}
+window.addEventListener('resize',updateMobBtn);
+
+// ── Tabs ────────────────────────────────
+function switchTab(id, idx){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ps-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.ps-item')[idx].classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ── Profile ─────────────────────────────
+function loadProfile(){
+  const u=currentUser;
+  // Sidebar
+  document.getElementById('sideName').textContent=u.full_name;
+  document.getElementById('sideEmail').textContent=u.email;
+  document.getElementById('sideBadge').textContent=u.role.toUpperCase();
+  document.getElementById('sideAvaLetter').textContent=u.full_name[0].toUpperCase();
+  if(u.avatar_url){ document.getElementById('sideAva').innerHTML=`<img src="${u.avatar_url}" alt=""/>`; }
+  // Form
+  document.getElementById('pName').value=u.full_name;
+  document.getElementById('pEmail').value=u.email;
+  document.getElementById('pPhone').value=u.phone||'';
+  document.getElementById('pAvatar').value=u.avatar_url||'';
+  // Avatar large
+  const al=document.getElementById('avaLg');
+  if(u.avatar_url){ al.innerHTML=`<img src="${u.avatar_url}" alt=""/><div class="ava-lg-overlay">📷</div>`; }
+  else { al.innerHTML=`<span id="avaLetter">${u.full_name[0].toUpperCase()}</span><div class="ava-lg-overlay">📷</div>`; }
+  // Email verify
+  document.getElementById('emailVerifyCard').style.display=u.email_verified?'none':'block';
+}
+
+function saveProfile(){
+  const n=document.getElementById('pName').value.trim();
+  if(n.length<2){ toast('Введите корректное имя','⚠️'); return; }
+  currentUser=updateUser(currentUser.id,{full_name:n, phone:document.getElementById('pPhone').value.trim(), avatar_url:document.getElementById('pAvatar').value.trim()});
+  loadProfile();
+  toast('Профиль обновлён ✓');
+}
+
+function changeAvatar(){
+  const url=prompt('Введите URL фото профиля:');
+  if(url){ document.getElementById('pAvatar').value=url; saveProfile(); }
+}
+
+// ── Stats ────────────────────────────────
+function renderStats(){
+  const orders=getOrdersByUser(currentUser.id);
+  const spent=orders.reduce((s,o)=>s+o.total,0);
+  const wish=getWishlist(currentUser.id);
+  document.getElementById('stOrders').textContent=orders.length;
+  document.getElementById('stSpent').textContent='₸ '+Math.round(spent/1000)+'K';
+  document.getElementById('stWish').textContent=wish.length;
+  // Order badge
+  const active=orders.filter(o=>o.status!=='delivered'&&o.status!=='cancelled').length;
+  const ob=document.getElementById('ordersBadge');
+  if(active>0){ ob.textContent=active; ob.style.display='block'; }
+  const wb=document.getElementById('wishBadge');
+  if(wish.length>0){ wb.textContent=wish.length; wb.style.display='block'; }
+}
+
+// ── Orders ────────────────────────────────
+const statusMap={processing:{lbl:'В обработке',cls:'s-processing'},transit:{lbl:'В пути',cls:'s-transit'},in_transit:{lbl:'В пути',cls:'s-transit'},delivered:{lbl:'Доставлено',cls:'s-delivered'},cancelled:{lbl:'Отменён',cls:'s-cancelled'}};
+const progressSteps=['Оформлен','Подтверждён','Собран','В пути','Доставлен'];
+const statusProgress={processing:1,transit:3,in_transit:3,delivered:5,cancelled:0};
+
+function filterOrders(filter){
+  let orders=getOrdersByUser(currentUser.id);
+  if(filter!=='all') orders=orders.filter(o=>o.status===filter||(filter==='transit'&&o.status==='in_transit'));
+  renderOrderList(orders);
+}
+
+function renderOrders(){ renderOrderList(getOrdersByUser(currentUser.id)); }
+
+function renderOrderList(orders){
+  const c=document.getElementById('ordersContainer');
+  if(!orders.length){ c.innerHTML='<div class="card"><div class="empty-state"><div class="es-icon">📦</div><h3>Заказов пока нет</h3><p>Ваши заказы появятся здесь после оформления покупки.</p></div></div>'; return; }
+  c.innerHTML=orders.map(o=>{
+    const sm=statusMap[o.status]||{lbl:o.status,cls:'s-processing'};
+    const prog=statusProgress[o.status]||0;
+    const stepsHtml=progressSteps.map((s,i)=>`<div class="op-step ${i<prog?'done':''} ${i===prog-1?'active':''}"><div class="op-dot">${i<prog?'✓':''}</div><div class="op-lbl">${s}</div></div>`).join('');
+    const trackHtml=o.track?`<div class="track-row"><span>Трек-номер:</span><span class="track-num">${o.track}</span><button class="track-copy" onclick="copyTrack('${o.track}')">Копировать</button></div>`:'';
+    const itemsStr=o.items.map(i=>`${i.name} × ${i.qty}`).join(' · ');
+    return `<div class="order-card">
+      <div class="order-top">
+        <div><span class="order-id"># ${o.id}</span> <span class="order-date">${new Date(o.date).toLocaleDateString('ru-RU')}</span></div>
+        <span class="status ${sm.cls}">${sm.lbl}</span>
+      </div>
+      ${o.status!=='delivered'&&o.status!=='cancelled'?`<div class="order-progress">${stepsHtml}</div>`:''}
+      ${trackHtml}
+      <div class="order-items">${itemsStr}</div>
+      <div class="order-bottom">
+        <div class="order-total">₸ ${o.total.toLocaleString('ru-KZ')}</div>
+        <div class="order-actions">
+          <button class="btn-receipt" onclick="downloadReceipt('${o.id}')">📄 Чек</button>
+          <button class="btn-repeat" onclick="repeatOrder('${o.id}')">Повторить</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copyTrack(t){ navigator.clipboard.writeText(t).then(()=>toast('Трек-номер скопирован')); }
+function downloadReceipt(id){ toast('📄 Чек #'+id+' — PDF генерируется (требует бэкенд)'); }
+function repeatOrder(id){ const o=getOrdersByUser(currentUser.id).find(x=>x.id===id); if(o) toast(o.items.length+' товаров добавлены в корзину'); }
+
+// ── Wishlist ──────────────────────────────
+function renderWishlist(){
+  const ids=getWishlist(currentUser.id);
+  const prods=getProducts();
+  const wl=prods.filter(p=>ids.includes(p.id));
+  const EMOJIS={skincare:'🧴',makeup:'💄',fragrance:'🌸',body:'✨'};
+  const c=document.getElementById('wishlistGrid');
+  const cnt=document.getElementById('wishCount');
+  cnt.textContent=wl.length?`${wl.length} товаров`:'';
+  if(!wl.length){ c.innerHTML='<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="es-icon">🤍</div><h3>Список желаний пуст</h3><p>Нажимайте ♡ на карточках товаров, чтобы сохранять понравившееся.</p><br/><a href="index.html#arrivals" style="color:var(--rose);font-weight:600;text-decoration:none">Перейти в каталог →</a></div></div>'; return; }
+  c.innerHTML=wl.map(p=>`<div class="wl-card">
+    <div class="wl-img">${EMOJIS[p.cat]||'✨'}</div>
+    <button class="wl-remove" onclick="removeWish('${p.id}',event)" title="Удалить">✕</button>
+    <div class="wl-body">
+      <div class="wl-brand">${p.brand}</div>
+      <div class="wl-name">${p.name}</div>
+      <div class="wl-price">₸ ${p.price.toLocaleString('ru-KZ')}</div>
+      ${p.oldPrice?`<div style="font-size:11px;color:var(--muted);text-decoration:line-through">₸ ${p.oldPrice.toLocaleString('ru-KZ')}</div>`:''}
+      <button class="wl-add" onclick="addWishToCart('${p.id}')">В корзину</button>
+    </div>
+  </div>`).join('');
+}
+
+function removeWish(id,ev){ ev.stopPropagation(); toggleWishlist(currentUser.id,id); renderWishlist(); renderStats(); toast('Удалено из избранного'); }
+function addWishToCart(id){ const p=getProducts().find(x=>x.id===id); if(p) toast('🛍 '+p.name+' добавлен в корзину'); }
+
+// ── Addresses ─────────────────────────────
+function renderAddresses(){
+  const list=document.getElementById('addrList');
+  const addrs=getAddressesByUser(currentUser.id);
+  if(!addrs.length){ list.innerHTML='<div class="empty-state" style="padding:24px"><div class="es-icon">📍</div><h3>Нет сохранённых адресов</h3><p>Добавьте адрес для быстрого оформления заказов.</p></div>'; return; }
+  list.innerHTML=addrs.map(a=>`<div class="addr-card ${a.is_default?'default':''}">
+    <div>
+      <div class="addr-lbl">${a.label||'Адрес'} ${a.is_default?'<span class="addr-def-pill">Основной</span>':''}</div>
+      <p>${a.recipient_name} · ${a.recipient_phone||''}</p>
+      <p>${a.country||'Казахстан'}, ${a.city}, ${a.street}${a.apartment?', '+a.apartment:''}</p>
+      ${a.postal_code?`<p style="font-size:11px;color:var(--muted)">Индекс: ${a.postal_code}</p>`:''}
+      ${a.delivery_notes?`<p style="font-size:11px;color:var(--muted)">${a.delivery_notes}</p>`:''}
+    </div>
+    <div class="addr-actions">
+      <button class="addr-btn" onclick="openAddrModal('${a.id}')">✏️</button>
+      <button class="addr-btn del" onclick="delAddr('${a.id}')">🗑</button>
+    </div>
+  </div>`).join('');
+}
+
+let editAddrId=null;
+function openAddrModal(id){
+  editAddrId=id;
+  if(id){
+    const a=getAddressesByUser(currentUser.id).find(x=>x.id===id);
+    document.getElementById('addrModalTitle').textContent='Редактировать адрес';
+    document.getElementById('aId').value=id;
+    document.getElementById('aLabel').value=a.label||'';
+    document.getElementById('aName').value=a.recipient_name||'';
+    document.getElementById('aPhone').value=a.recipient_phone||'';
+    document.getElementById('aCity').value=a.city||'';
+    document.getElementById('aStreet').value=a.street||'';
+    document.getElementById('aApt').value=a.apartment||'';
+    document.getElementById('aPostal').value=a.postal_code||'';
+    document.getElementById('aNotes').value=a.delivery_notes||'';
+    document.getElementById('aDefault').checked=a.is_default;
+  } else {
+    document.getElementById('addrModalTitle').textContent='Новый адрес';
+    ['aId','aLabel','aName','aPhone','aCity','aStreet','aApt','aPostal','aNotes'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('aDefault').checked=false;
+  }
+  document.getElementById('addrModal').classList.add('open');
+}
+function closeAddrModal(){ document.getElementById('addrModal').classList.remove('open'); }
+function saveAddrModal(){
+  const n=document.getElementById('aName').value.trim();
+  const c=document.getElementById('aCity').value.trim();
+  const s=document.getElementById('aStreet').value.trim();
+  if(!n||!c||!s){ toast('Заполните обязательные поля','⚠️'); return; }
+  saveAddress({id:editAddrId||null,user_id:currentUser.id,label:document.getElementById('aLabel').value.trim()||'Дом',recipient_name:n,recipient_phone:document.getElementById('aPhone').value.trim(),country:'Казахстан',city:c,street:s,apartment:document.getElementById('aApt').value.trim(),postal_code:document.getElementById('aPostal').value.trim(),delivery_notes:document.getElementById('aNotes').value.trim(),is_default:document.getElementById('aDefault').checked});
+  closeAddrModal(); renderAddresses(); toast('Адрес сохранён ✓');
+}
+function delAddr(id){ if(confirm('Удалить адрес?')){ deleteAddress(id); renderAddresses(); toast('Адрес удалён'); } }
+
+// ── Password ───────────────────────────────
+function openPassModal(){ document.getElementById('passModal').classList.add('open'); }
+function closePassModal(){ document.getElementById('passModal').classList.remove('open'); document.getElementById('passErr').classList.remove('show'); }
+function changePassword(){
+  const old=document.getElementById('passOld').value;
+  const nw=document.getElementById('passNew').value;
+  const nw2=document.getElementById('passNew2').value;
+  const err=document.getElementById('passErr');
+  if(old!==currentUser.password){ err.textContent='Неверный текущий пароль'; err.classList.add('show'); return; }
+  if(nw.length<6){ err.textContent='Новый пароль: минимум 6 символов'; err.classList.add('show'); return; }
+  if(nw!==nw2){ err.textContent='Пароли не совпадают'; err.classList.add('show'); return; }
+  currentUser=updateUser(currentUser.id,{password:nw});
+  closePassModal(); toast('Пароль изменён ✓');
+}
+
+// ── Auth ───────────────────────────────────
+function doLogin(){
+  const r=login(document.getElementById('lwEmail').value.trim(), document.getElementById('lwPass').value);
+  if(r.error){ const e=document.getElementById('lwErr'); e.textContent=r.error; e.classList.add('show'); return; }
+  currentUser=r.user; init();
+}
+function doLogout(){ logout(); currentUser=null; init(); }
+document.getElementById('lwPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+// ── Delete account ─────────────────────────
+function confirmDelete(){
+  if(confirm('Удалить аккаунт? Все данные будут стёрты!')){
+    logout(); toast('Аккаунт удалён'); setTimeout(()=>window.location='index.html',1500);
+  }
+}
+
+// ── Toast ──────────────────────────────────
+function toast(msg,icon='✓'){
+  const t=document.createElement('div');
+  t.className='tk';
+  t.innerHTML=`<span>${icon}</span>${msg}`;
+  document.getElementById('tr').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(120%)'; t.style.transition='.3s'; setTimeout(()=>t.remove(),400); },2800);
+}
+
+// ── Close modals on backdrop ───────────────
+document.getElementById('addrModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeAddrModal(); });
+document.getElementById('passModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closePassModal(); });
+
+init();
+</script>
+</body>
+</html>

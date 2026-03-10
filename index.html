@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LUMIÈRE — Luxury beauty e-commerce. Premium skincare, makeup and fragrances. Delivery across Kazakhstan. Pay with Kaspi.kz · Halyk Pay." />
+  <title>LUMIÈRE — Luxury Beauty Kazakhstan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════
+       OVERLAY & CART SIDEBAR
+  ════════════════════════════════════ -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Cart Sidebar -->
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3 class="cart-title">Корзина</h3>
+      <span class="cart-count-label" id="cartCountLabel">0 товаров</span>
+      <button class="close-cart" id="closeCart">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty" id="cartEmpty">
+        <div class="cart-empty-icon">🛍</div>
+        <p>Ваша корзина пуста</p>
+        <span>Добавьте что-нибудь красивое</span>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-subtotal">
+        <span>Итого</span>
+        <strong id="cartTotal">₸ 0</strong>
+      </div>
+      <div class="cart-delivery-note">Доставка рассчитывается при оформлении</div>
+      <button class="btn-kaspi checkout-kaspi" onclick="checkoutKaspi()">
+        <span class="kaspi-logo-btn"><span class="kk">K</span>aspi</span>
+        Оплатить через Kaspi
+      </button>
+      <button class="btn-halyk checkout-halyk" onclick="checkoutHalyk()">
+        <span class="halyk-logo-btn">H</span>
+        Оплатить через Halyk Pay
+      </button>
+      <button class="btn-outline-dark full-w">Оформить заказ</button>
+    </div>
+  </aside>
+
+  <!-- Quick-view Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="product-modal" id="productModal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-img-wrap">
+        <div class="modal-img" id="modalImg"></div>
+        <span class="modal-badge" id="modalBadge"></span>
+      </div>
+      <div class="modal-body">
+        <p class="modal-brand" id="modalBrand"></p>
+        <h2 class="modal-name" id="modalName"></h2>
+        <div class="modal-rating-row">
+          <span class="modal-stars" id="modalStars"></span>
+          <span class="modal-reviews" id="modalReviews"></span>
+        </div>
+        <p class="modal-price" id="modalPrice"></p>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-actions">
+          <div class="qty-stepper">
+            <button class="qty-dec">−</button>
+            <span class="qty-num">1</span>
+            <button class="qty-inc">+</button>
+          </div>
+          <button class="btn-add-modal" id="modalAddBtn">В корзину</button>
+        </div>
+        <div class="modal-payments">
+          <span>Оплата:</span>
+          <span class="mp-kaspi">Kaspi.kz</span>
+          <span class="mp-halyk">Halyk Pay</span>
+          <span class="mp-card">Visa / MC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ═══════════════════════════════════
+       NAVIGATION
+  ════════════════════════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <button class="burger" id="burger" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="#" class="nav-logo">
+        LUMIÈRE
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#collection">Коллекции</a></li>
+        <li><a href="#arrivals">Новинки</a></li>
+        <li><a href="#brands">Бренды</a></li>
+        <li><a href="#story">О нас</a></li>
+        <li><a href="#contact">Контакты</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="nav-icon-btn" aria-label="Поиск" id="searchToggle">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <button class="nav-icon-btn" aria-label="Избранное">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+        <!-- Profile icon -->
+        <a href="profile.html" class="nav-icon-btn" id="navProfileBtn" aria-label="Мой профиль" title="Мой профиль">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div id="navUserDot" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--rose);border-radius:50%;border:2px solid var(--cream)"></div>
+        </a>
+        <!-- Admin panel icon (only for admins) -->
+        <a href="admin.html" class="nav-icon-btn" id="navAdminBtn" aria-label="Админ-панель" title="Панель администратора" style="display:none">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </a>
+        <button class="nav-icon-btn cart-trigger" id="openCart" aria-label="Корзина">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+        </button>
+      </div>
+    </div>
+    <!-- Search bar -->
+    <div class="search-bar-full" id="searchBarFull">
+      <input type="text" placeholder="Поиск: сыворотка, помада, тон Chanel…" id="searchInput" />
+      <button id="searchClose">✕</button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav drawer -->
+  <div class="mobile-nav" id="mobileNav">
+    <button class="mobile-nav-close" id="mobileNavClose">✕</button>
+    <div class="mobile-nav-logo">LUMIÈRE</div>
+    <ul class="mobile-nav-links">
+      <li><a href="#collection" class="mnl">Коллекции</a></li>
+      <li><a href="#arrivals" class="mnl">Новинки</a></li>
+      <li><a href="#brands" class="mnl">Бренды</a></li>
+      <li><a href="#story" class="mnl">О нас</a></li>
+      <li><a href="#contact" class="mnl">Контакты</a></li>
+    </ul>
+    <div class="mobile-nav-footer">
+      <p>Доставка по всему Казахстану</p>
+      <p>📍 Алматы · Астана · Шымкент</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+        <a href="profile.html" style="display:block;text-align:center;padding:11px;background:var(--near-black);color:var(--cream);border-radius:10px;font-size:13px;font-weight:600;text-decoration:none">Войти в аккаунт</a>
+        <a href="register.html" style="display:block;text-align:center;padding:10px;border:1.5px solid var(--beige-dk);color:var(--cream);border-radius:10px;font-size:13px;font-weight:500;text-decoration:none">Регистрация</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       HERO
+  ════════════════════════════════════ -->
+  <section class="hero" id="hero">
+    <div class="hero-visual" id="heroVisual">
+      <div class="hero-bg-art">
+        <div class="hba-blob hba-1"></div>
+        <div class="hba-blob hba-2"></div>
+        <div class="hba-blob hba-3"></div>
+        <div class="hero-product-art">
+          <div class="hpa-bottle hpa-b1"></div>
+          <div class="hpa-bottle hpa-b2"></div>
+          <div class="hpa-bottle hpa-b3"></div>
+          <div class="hpa-scatter">
+            <span class="petal p1"></span>
+            <span class="petal p2"></span>
+            <span class="petal p3"></span>
+            <span class="petal p4"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Новая коллекция · Весна 2024</div>
+      <h1 class="hero-title">
+        Красота<br/><em>без компромиссов</em>
+      </h1>
+      <p class="hero-subtitle">
+        Люксовая косметика и уход за кожей.<br/>
+        Доставка по Казахстану. Оплата через Kaspi.kz.
+      </p>
+      <div class="hero-cta-row">
+        <a href="#arrivals" class="btn-hero-primary">Смотреть коллекцию</a>
+        <a href="#story" class="btn-hero-ghost">Наша история</a>
+      </div>
+      <div class="hero-social-proof">
+        <div class="hsp-item"><strong>15 000+</strong><span>Клиентов</span></div>
+        <div class="hsp-divider"></div>
+        <div class="hsp-item"><strong>200+</strong><span>Брендов</span></div>
+        <div class="hsp-divider"></div>
+        <div class="hsp-item"><strong>4.9 ★</strong><span>Рейтинг</span></div>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <div class="scroll-line"></div>
+      <span>Прокрутите</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       TICKER
+  ════════════════════════════════════ -->
+  <div class="ticker-wrap">
+    <div class="ticker-track">
+      <div class="ticker-item">✦ Бесплатная доставка от ₸ 15 000</div>
+      <div class="ticker-item">✦ Chanel · La Mer · NARS · Lancôme · Armani</div>
+      <div class="ticker-item">✦ Kaspi.kz · Halyk Pay · Visa · Mastercard</div>
+      <div class="ticker-item">✦ Доставка по всему Казахстану</div>
+      <div class="ticker-item">✦ Бесплатная доставка от ₸ 15 000</div>
+      <div class="ticker-item">✦ Chanel · La Mer · NARS · Lancôme · Armani</div>
+      <div class="ticker-item">✦ Kaspi.kz · Halyk Pay · Visa · Mastercard</div>
+      <div class="ticker-item">✦ Доставка по всему Казахстану</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       FEATURED COLLECTION
+  ════════════════════════════════════ -->
+  <section class="section featured-section" id="collection">
+    <div class="section-header-block">
+      <p class="section-eyebrow">Выбор редакции</p>
+      <h2 class="section-title">Главная коллекция</h2>
+    </div>
+    <div class="featured-grid">
+      <div class="featured-card fc-dark" data-id="f1">
+        <div class="fc-art fc-art-dark">
+          <div class="fc-prod-img fpi-1"></div>
+        </div>
+        <div class="fc-body">
+          <p class="fc-brand">La Mer</p>
+          <h3 class="fc-name">Crème de la Mer</h3>
+          <p class="fc-desc">Легендарный крем с морскими водорослями. Восстанавливает и омолаживает кожу за 7 дней.</p>
+          <div class="fc-footer">
+            <span class="fc-price">₸ 128 000</span>
+            <button class="fc-btn" onclick="openQuickView('f1')">Подробнее</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="featured-card fc-light" data-id="f2">
+        <div class="fc-art">
+          <div class="fc-prod-img fpi-2"></div>
+        </div>
+        <div class="fc-body">
+          <p class="fc-brand">Charlotte Tilbury</p>
+          <h3 class="fc-name">Pillow Talk Palette</h3>
+          <p class="fc-desc">Культовая палетка для безупречного мейкапа. Нюдовые оттенки для казахстанского лета.</p>
+          <div class="fc-footer">
+            <span class="fc-price">₸ 54 900</span>
+            <button class="fc-btn" onclick="openQuickView('f2')">Подробнее</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="featured-card fc-rose" data-id="f3">
+        <div class="fc-art">
+          <div class="fc-prod-img fpi-3"></div>
+        </div>
+        <div class="fc-body">
+          <p class="fc-brand">Jo Malone</p>
+          <h3 class="fc-name">English Pear &amp; Freesia</h3>
+          <p class="fc-desc">Элегантный британский парфюм. Нежный аромат груши и нарцисса на целый день.</p>
+          <div class="fc-footer">
+            <span class="fc-price">₸ 89 000</span>
+            <button class="fc-btn" onclick="openQuickView('f3')">Подробнее</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       NEW ARRIVALS GRID
+  ════════════════════════════════════ -->
+  <section class="section arrivals-section" id="arrivals">
+    <div class="section-header-block">
+      <p class="section-eyebrow">Только что в магазине</p>
+      <h2 class="section-title">Новые поступления</h2>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="ftab active-ftab" data-filter="all">Все</button>
+        <button class="ftab" data-filter="skincare">Уход</button>
+        <button class="ftab" data-filter="makeup">Макияж</button>
+        <button class="ftab" data-filter="fragrance">Ароматы</button>
+        <button class="ftab" data-filter="body">Тело</button>
+      </div>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <!-- Injected by JS -->
+    </div>
+    <div class="load-more-wrap">
+      <button class="btn-load-more" id="loadMoreBtn">Показать ещё</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       BRAND LOGOS
+  ════════════════════════════════════ -->
+  <section class="brands-strip" id="brands">
+    <div class="brands-inner">
+      <p class="brands-label">Официальные партнёры</p>
+      <div class="brands-logos">
+        <div class="brand-logo-item">CHANEL</div>
+        <div class="brand-logo-item">LA MER</div>
+        <div class="brand-logo-item">NARS</div>
+        <div class="brand-logo-item">LANCÔME</div>
+        <div class="brand-logo-item">ARMANI</div>
+        <div class="brand-logo-item">DIOR</div>
+        <div class="brand-logo-item">MAC</div>
+        <div class="brand-logo-item">BOBBI BROWN</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       BRAND STORY
+  ════════════════════════════════════ -->
+  <section class="story-section" id="story">
+    <div class="story-visual">
+      <div class="story-art">
+        <div class="story-art-main">
+          <div class="sa-blob-1"></div>
+          <div class="sa-blob-2"></div>
+          <div class="sa-img-frame">
+            <div class="sa-product-scene">
+              <div class="sap-item sap-1"></div>
+              <div class="sap-item sap-2"></div>
+              <div class="sap-item sap-3"></div>
+            </div>
+          </div>
+        </div>
+        <div class="story-art-badge glass-card-story">
+          <p class="sab-num">2019</p>
+          <p class="sab-label">Год основания<br/>в Алматы</p>
+        </div>
+      </div>
+    </div>
+    <div class="story-text">
+      <p class="section-eyebrow">Наша история</p>
+      <h2 class="story-title">Люкс, рождённый<br/>в <em>Казахстане</em></h2>
+      <p class="story-body">
+        LUMIÈRE основан в Алматы в 2019 году с простой идеей: каждая женщина заслуживает доступа к лучшей косметике мира без переплат и подделок.
+      </p>
+      <p class="story-body">
+        Мы работаем напрямую с дистрибьюторами Chanel, La Mer, NARS и 200+ других брендов. Все товары сертифицированы и имеют гарантию подлинности.
+      </p>
+      <div class="story-stats">
+        <div class="stat-item">
+          <span class="stat-num">15 000+</span>
+          <span class="stat-label">Довольных клиентов</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">3</span>
+          <span class="stat-label">Города Казахстана</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">Оригинальная продукция</span>
+        </div>
+      </div>
+      <a href="#arrivals" class="btn-story-cta">Открыть каталог</a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       TESTIMONIALS
+  ════════════════════════════════════ -->
+  <section class="section testimonials-section" id="reviews">
+    <div class="section-header-block">
+      <p class="section-eyebrow">Отзывы</p>
+      <h2 class="section-title">Что говорят наши клиенты</h2>
+    </div>
+    <div class="testimonials-track" id="testimonialsTrack">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Заказала La Mer и получила в Алматы за 2 дня. Упаковка безупречная, крем оригинальный — проверила по QR-коду. Буду заказывать снова!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar ta-1">А</div>
+          <div>
+            <p class="testi-name">Айна Бекова</p>
+            <p class="testi-city">Алматы · Skincare</p>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Наконец-то в Казахстане есть место, где можно купить NARS без риска. Оплатила через Kaspi — очень удобно. Помада пришла за сутки."</p>
+        <div class="testi-author">
+          <div class="testi-avatar ta-2">Д</div>
+          <div>
+            <p class="testi-name">Динара Сейткали</p>
+            <p class="testi-city">Астана · Makeup</p>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card testi-featured">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Подарила маме набор Jo Malone на день рождения. Красивая подарочная упаковка, быстрая доставка в Шымкент. Мама счастлива!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar ta-3">М</div>
+          <div>
+            <p class="testi-name">Малика Ержанова</p>
+            <p class="testi-city">Шымкент · Fragrance</p>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Charlotte Tilbury — мечта! Заказала три раза, каждый раз отличный сервис. Оплата через Halyk Pay без проблем. Рекомендую всем!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar ta-4">С</div>
+          <div>
+            <p class="testi-name">Сабина Касымова</p>
+            <p class="testi-city">Алматы · Makeup</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-nav">
+      <button class="testi-arrow" id="testiPrev">←</button>
+      <div class="testi-dots" id="testiDots"></div>
+      <button class="testi-arrow" id="testiNext">→</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       PAYMENT BADGES
+  ════════════════════════════════════ -->
+  <section class="payment-section">
+    <div class="payment-inner">
+      <p class="payment-label">Удобная оплата в Казахстане</p>
+      <div class="payment-badges">
+        <div class="pay-badge pay-kaspi">
+          <span class="kaspi-k-big">K</span>aspi.kz
+        </div>
+        <div class="pay-badge pay-halyk">
+          <span class="halyk-h-big">H</span> Halyk Pay
+        </div>
+        <div class="pay-badge pay-visa">
+          <span class="visa-text">VISA</span>
+        </div>
+        <div class="pay-badge pay-mc">
+          <span class="mc-left"></span><span class="mc-right"></span>
+          <span class="mc-text">Mastercard</span>
+        </div>
+        <div class="pay-badge pay-secure">
+          🔒 SSL 256-bit
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       NEWSLETTER
+  ════════════════════════════════════ -->
+  <section class="newsletter-section" id="newsletter">
+    <div class="newsletter-inner">
+      <div class="nl-text">
+        <p class="section-eyebrow" style="color:var(--blush)">Будьте в курсе</p>
+        <h2 class="nl-title">Получайте первыми<br/>о новинках и скидках</h2>
+        <p class="nl-sub">Только ценный контент. Никакого спама. Отписаться можно в один клик.</p>
+      </div>
+      <form class="nl-form" id="nlForm" onsubmit="submitNewsletter(event)">
+        <div class="nl-input-row">
+          <input type="email" placeholder="ваш@email.com" class="nl-input" required />
+          <button type="submit" class="nl-btn">Подписаться</button>
+        </div>
+        <p class="nl-terms">Нажимая кнопку, вы соглашаетесь с <a href="#">политикой конфиденциальности</a></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       FOOTER
+  ════════════════════════════════════ -->
+  <footer class="site-footer" id="contact">
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <div class="footer-logo">LUMIÈRE</div>
+        <p class="footer-tagline">Роскошная красота.<br/>Доступная в Казахстане.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-link" aria-label="Instagram">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="Telegram">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="WhatsApp">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-col-title">Каталог</h4>
+        <ul class="footer-links">
+          <li><a href="#">Уход за кожей</a></li>
+          <li><a href="#">Макияж</a></li>
+          <li><a href="#">Ароматы</a></li>
+          <li><a href="#">Уход за телом</a></li>
+          <li><a href="#">Подарочные наборы</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-col-title">Информация</h4>
+        <ul class="footer-links">
+          <li><a href="#">О нас</a></li>
+          <li><a href="#">Доставка и оплата</a></li>
+          <li><a href="#">Возврат</a></li>
+          <li><a href="#">Гарантия оригинала</a></li>
+          <li><a href="#">Блог о красоте</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-col-title">Контакты</h4>
+        <ul class="footer-links footer-contacts">
+          <li>📍 Алматы, ул. Абая 10</li>
+          <li>📞 <a href="tel:+77771234567">+7 (777) 123-45-67</a></li>
+          <li>✉ <a href="mailto:hello@lumiere.kz">hello@lumiere.kz</a></li>
+          <li>🕐 Пн–Вс: 9:00–21:00</li>
+        </ul>
+        <div class="footer-delivery">
+          <div class="fd-city">Алматы</div>
+          <div class="fd-city">Астана</div>
+          <div class="fd-city">Шымкент</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2024 LUMIÈRE Kazakhstan. Все права защищены.</p>
+      <p class="footer-reg">ТОО «Люмьер Казахстан» · БИН 123456789012 · Алматы, Казахстан</p>
+    </div>
+  </footer>
+
+  <script src="db.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>
