@@ -209,7 +209,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="sb-item" onclick="window.open('index.html','_blank')"><span class="ico">🌐</span>Открыть сайт</div>
     </div>
     <div class="sb-footer">
-      <div class="sb-user"><span id="sbUserName">—</span><span style="font-size:11px;color:var(--muted)">Администратор</span></div>
+      <div class="sb-user"><span id="sbUserName" style="font-weight:600;color:var(--text);display:block;font-size:13px">—</span><span style="font-size:11px;color:var(--muted)">Администратор</span></div>
       <button class="btn-out" onclick="doLogout()">Выйти</button>
     </div>
   </nav>
@@ -427,26 +427,36 @@ function doLogin(){
 }
 function doLogout(){ logout(); location.reload(); }
 
-// Auto-login if admin session exists
+// Auto-login if admin session exists (use existing session, don't call login() again)
 (function(){
   const s=getSession();
-  if(s){ const u=getUserById(s.userId); if(u&&u.role==='admin'){ document.getElementById('lEmail').value=u.email; doLogin(); } }
+  if(s){
+    const u=getUserById(s.userId);
+    if(u&&u.role==='admin'){
+      adminUser=u;
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('adminLayout').style.display='grid';
+      document.getElementById('sbUserName').textContent=u.full_name;
+      initClock();
+      refreshAll();
+    }
+  }
 })();
 document.getElementById('lPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
 // ── Clock ────────────────────────────
 function initClock(){
-  function tick(){ document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('ru-KZ',{hour:'2-digit',minute:'2-digit'}); }
-  tick(); setInterval(tick,10000);
+  function tick(){ document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('ru-KZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+  tick(); setInterval(tick,1000);
 }
 
 // ── Tab navigation ───────────────────
 const tabNames=['Дашборд','Каталог товаров','Управление заказами','Пользователи'];
 function goTab(id, idx){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach((i,n)=>{ if(n<4) i.classList.toggle('active',n===idx); });
+  document.querySelectorAll('.sb-item').forEach((i,n)=>i.classList.toggle('active',n===idx));
   document.getElementById('tab-'+id).classList.add('active');
-  document.getElementById('topbarTitle').textContent=tabNames[idx];
+  document.getElementById('topbarTitle').textContent=tabNames[idx]||'Дашборд';
 }
 
 // ── Refresh all ──────────────────────
@@ -538,7 +548,7 @@ function renderProducts(){
       <td><span class="editable" contenteditable="true" onblur="inlineEditPrice('${p.id}',this.textContent)">₸ ${p.price.toLocaleString('ru-KZ')}</span></td>
       <td style="color:var(--muted)">${p.cat}</td>
       <td><span class="editable ${sc}" contenteditable="true" onblur="editStock('${p.id}',this.textContent)">${qty}</span> шт.</td>
-      <td><span class="badge b-${p.badge||''}">${p.badge||'—'}</span></td>
+      <td><span class="badge ${p.badge?'b-'+p.badge:''}">${p.badge||'—'}</span></td>
       <td><div class="btn-row">
         <button class="btn-icon" onclick="openProdModal('${p.id}')" title="Редактировать">✏️</button>
         <button class="btn-icon del" onclick="delProd('${p.id}')" title="Удалить">🗑</button>
@@ -551,6 +561,7 @@ function inlineEdit(id,field,val){
   val=val.trim(); if(!val) return;
   saveProduct({id, [field]:val});
   toast('✓ '+field+' обновлено');
+  renderProducts();
 }
 function inlineEditPrice(id,val){
   const n=parseInt(val.replace(/\D/g,''));
@@ -619,8 +630,8 @@ function saveProdModal(){
 }
 
 // ── ORDERS ────────────────────────────
-const statusLabels={processing:'В обработке',confirmed:'Подтверждён',in_transit:'В пути',delivered:'Доставлен',cancelled:'Отменён'};
-const statusCls={processing:'s-processing',confirmed:'s-confirmed',in_transit:'s-transit',delivered:'s-delivered',cancelled:'s-cancelled'};
+const statusLabels={processing:'В обработке',confirmed:'Подтверждён',in_transit:'В пути',transit:'В пути',delivered:'Доставлен',cancelled:'Отменён'};
+const statusCls={processing:'s-processing',confirmed:'s-confirmed',in_transit:'s-transit',transit:'s-transit',delivered:'s-delivered',cancelled:'s-cancelled'};
 
 function renderOrders(){
   const q=(document.getElementById('ordSearch').value||'').toLowerCase();
@@ -682,8 +693,10 @@ function saveOrdStatus(){
 function delOrd(id){ if(!confirm('Удалить заказ #'+id+'?')){ return; } deleteOrder(id); renderOrders(); toast('Заказ удалён'); }
 function printOrder(){
   const o=getAllOrders().find(x=>x.id===editOrdId);
-  const user=getUserById(o?.user_id);
+  if(!o){ toast('Заказ не найден','⚠️'); return; }
+  const user=getUserById(o.user_id);
   const w=window.open('','_blank');
+  if(!w){ toast('Popup заблокирован браузером — разрешите всплывающие окна','⚠️'); return; }
   w.document.write(`<html><head><title>Накладная #${o.id}</title></head><body style="font-family:Georgia,serif;padding:40px;max-width:600px">
     <h2 style="letter-spacing:4px">LUMIÈRE</h2><hr/><h3>Накладная #${o.id}</h3>
     <p><b>Клиент:</b> ${user?.full_name||'—'} &nbsp; ${user?.phone||''}</p>
