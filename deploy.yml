@@ -1,0 +1,48 @@
+name: Deploy Static Website to GitHub Pages
+
+on:
+  # Запускается при пуше (отправке изменений) в ветку main или master
+  push:
+    branches:
+      - main
+      - master
+  
+  # Позволяет запускать этот workflow вручную из вкладки Actions
+  workflow_dispatch:
+
+# Устанавливаем права доступа для токена GITHUB_TOKEN, чтобы разрешить развертывание на GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Настройка для одновременного выполнения только одного процесса деплоя
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Задание развертывания
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Если ваш сайт находится не в корне, а в подпапке (например lumiere-site), 
+      # измените путь '.' на './lumiere-site' в следующей директиве path:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Загрузить весь репозиторий:
+          path: '.'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
