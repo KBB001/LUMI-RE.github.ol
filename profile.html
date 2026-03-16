@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Мой профиль — LUMIÈRE</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="site.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--sidebar:260px}
 body{background:var(--beige);min-height:100vh}
@@ -30,22 +31,25 @@ body{background:var(--beige);min-height:100vh}
 .pl{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh;max-width:1200px;margin:0 auto;padding-top:70px}
 
 /* Sidebar */
-.ps{background:var(--cream);border-right:1px solid rgba(90,50,30,.08);display:flex;flex-direction:column;position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto}
-.ps-header{padding:24px 24px 20px;border-bottom:1px solid var(--beige)}
-.ps-ava{width:64px;height:64px;border-radius:50%;background:var(--near-black);display:flex;align-items:center;justify-content:center;font-family:var(--font-s);font-size:26px;color:var(--cream);margin-bottom:12px;overflow:hidden;flex-shrink:0}
+.ps{background:var(--beige);border-right:1px solid rgba(90,50,30,.08);display:flex;flex-direction:column;position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto}
+.ps-header{padding:24px 24px 10px;border-bottom:none;text-align:center;display:flex;flex-direction:column;align-items:center}
+.ps-ava{width:80px;height:80px;border-radius:50%;background:var(--near-black);display:flex;align-items:center;justify-content:center;font-family:var(--font-s);font-size:32px;color:var(--cream);margin-bottom:12px;overflow:hidden;flex-shrink:0;box-shadow:var(--shadow)}
 .ps-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.ps-name{font-family:var(--font-s);font-size:18px;font-weight:600;color:var(--near-black)}
-.ps-email{font-size:11px;color:var(--muted);margin-top:2px}
-.ps-badge{display:inline-block;background:var(--near-black);color:var(--cream);font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:20px;margin-top:6px}
-.ps-nav{padding:12px 0;flex:1}
-.ps-item{display:flex;align-items:center;gap:12px;padding:11px 24px;font-size:13px;font-weight:500;color:var(--mid);cursor:pointer;border-left:3px solid transparent;transition:all .2s;text-decoration:none}
-.ps-item:hover{background:var(--beige);color:var(--near-black)}
-.ps-item.active{border-left-color:var(--near-black);background:var(--beige);color:var(--near-black);font-weight:600}
-.ps-item .badge{background:var(--rose);color:#fff;border-radius:20px;font-size:9px;padding:2px 7px;margin-left:auto}
-.ps-sep{height:1px;background:var(--beige);margin:6px 24px}
+.ps-name{font-family:var(--font-s);font-size:20px;font-weight:600;color:var(--near-black)}
+.ps-email{font-size:12px;color:var(--muted);margin-top:2px}
+.ps-badge{display:none;}
+.ps-nav{padding:16px 20px;flex:1;display:flex;flex-direction:column;gap:18px}
+.ps-group-title{font-size:11px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:8px;padding-left:12px;text-transform:uppercase}
+.ps-group-cards{background:var(--cream);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)}
+.ps-item{display:flex;align-items:center;gap:12px;padding:14px 16px;font-size:13px;font-weight:500;color:var(--near-black);cursor:pointer;border-bottom:1px solid var(--beige);transition:background .2s;text-decoration:none}
+.ps-item:last-child{border-bottom:none}
+.ps-item:hover{background:rgba(0,0,0,0.02)}
+.ps-item.active{background:rgba(0,0,0,0.04);font-weight:600}
+.ps-arrow{margin-left:auto;color:var(--muted);font-size:14px}
+.ps-item .badge{background:var(--rose);color:#fff;border-radius:20px;font-size:9px;padding:2px 7px;margin-left:6px}
 .ps-footer{padding:16px 24px}
-.ps-logout{background:none;border:1.5px solid rgba(200,50,50,.25);border-radius:10px;padding:9px;font-size:12px;font-weight:600;color:#c04040;cursor:pointer;width:100%;transition:all .2s}
-.ps-logout:hover{background:rgba(200,50,50,.08)}
+.ps-logout{background:none;border:none;padding:9px;font-size:13px;font-weight:600;color:#c04040;cursor:pointer;width:100%;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.ps-logout:hover{opacity:.7}
 
 /* Main */
 .pm{padding:36px 40px;min-width:0}
@@ -172,15 +176,20 @@ body{background:var(--beige);min-height:100vh}
 @keyframes si{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
 
 @media(max-width:768px){
-  .pl{grid-template-columns:1fr;padding-top:64px}
-  .ps{position:fixed;left:-280px;top:0;bottom:0;z-index:800;width:280px;transition:left .3s;height:auto;overflow-y:auto}
-  .ps.open{left:0}
-  .pm{padding:20px 16px}
+  .pl{grid-template-columns:1fr;padding-top:64px;background:var(--beige)}
+  .pl:not(.show-content) .ps{position:static;width:100%;border:none;z-index:1;height:auto;left:auto;padding-bottom:100px;background:var(--beige)}
+  .pl:not(.show-content) .pm{display:none}
+  .pl.show-content .ps{display:none}
+  .pl.show-content .pm{padding:20px 16px;display:block;background:var(--beige)}
   .fg{grid-template-columns:1fr}
   .stats{grid-template-columns:1fr 1fr}
   .tab-head{flex-wrap:wrap;gap:10px}
   .tab-title{font-size:22px}
+  #mbMenuBtn{display:none !important}
 }
+.mb-back{display:none;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;margin-bottom:20px;padding:6px 0}
+.mb-back:hover{color:var(--near-black)}
+@media(max-width:768px){ .mb-back{display:inline-flex} }
 </style>
 </head>
 <body>
@@ -228,32 +237,53 @@ body{background:var(--beige);min-height:100vh}
       <div class="ps-ava" id="sideAva" onclick="switchTab('tab-profile',0)"><span id="sideAvaLetter">A</span></div>
       <div class="ps-name" id="sideName">—</div>
       <div class="ps-email" id="sideEmail">—</div>
-      <div class="ps-badge" id="sideBadge">CUSTOMER</div>
+      <div class="ps-badge" id="sideBadge" style="display:none;">CUSTOMER</div>
     </div>
     <nav class="ps-nav">
-      <a class="ps-item active" onclick="switchTab('tab-profile',0);return false" href="#">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Личные данные
-      </a>
-      <a class="ps-item" onclick="switchTab('tab-orders',1);return false" href="#">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
-        Мои заказы
-        <span class="badge" id="ordersBadge" style="display:none">0</span>
-      </a>
-      <a class="ps-item" onclick="switchTab('tab-wishlist',2);return false" href="#">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        Избранное
-        <span class="badge" id="wishBadge" style="display:none">0</span>
-      </a>
-      <a class="ps-item" onclick="switchTab('tab-addresses',3);return false" href="#">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Адресная книга
-      </a>
-      <div class="ps-sep"></div>
-      <a class="ps-item" onclick="switchTab('tab-security',4);return false" href="#">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Настройки
-      </a>
+      <div class="ps-group">
+        <div class="ps-group-title">Аккаунт</div>
+        <div class="ps-group-cards">
+          <a class="ps-item active" onclick="switchTab('tab-profile',0);return false" href="#">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Личные данные
+            <span class="ps-arrow">→</span>
+          </a>
+          <a class="ps-item" onclick="switchTab('tab-addresses',3);return false" href="#">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Адресная книга
+            <span class="ps-arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="ps-group">
+        <div class="ps-group-title">Покупки</div>
+        <div class="ps-group-cards">
+          <a class="ps-item" onclick="switchTab('tab-orders',1);return false" href="#">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+            Мои заказы
+            <span class="badge" id="ordersBadge" style="display:none">0</span>
+            <span class="ps-arrow">→</span>
+          </a>
+          <a class="ps-item" onclick="switchTab('tab-wishlist',2);return false" href="#">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Избранное
+            <span class="badge" id="wishBadge" style="display:none">0</span>
+            <span class="ps-arrow">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="ps-group">
+        <div class="ps-group-title">Прочее</div>
+        <div class="ps-group-cards">
+          <a class="ps-item" onclick="switchTab('tab-security',4);return false" href="#">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Настройки
+            <span class="ps-arrow">→</span>
+          </a>
+        </div>
+      </div>
     </nav>
     <div class="ps-footer">
       <button class="ps-logout" onclick="doLogout()">Выйти из аккаунта</button>
@@ -262,6 +292,10 @@ body{background:var(--beige);min-height:100vh}
 
   <!-- MAIN CONTENT -->
   <main class="pm">
+    <button class="mb-back" onclick="backToNav()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      Назад
+    </button>
 
     <!-- ─── TAB 1: ЛИЧНЫЕ ДАННЫЕ ─── -->
     <div class="tab active" id="tab-profile">
@@ -478,6 +512,14 @@ function switchTab(id, idx){
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.ps-item')[idx].classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  if(window.innerWidth<=768){
+    document.getElementById('profileLayout').classList.add('show-content');
+  }
+}
+
+function backToNav(){
+  document.getElementById('profileLayout').classList.remove('show-content');
+  window.scrollTo(0,0);
 }
 
 // ── Profile ─────────────────────────────
@@ -573,7 +615,229 @@ function renderOrderList(orders){
 }
 
 function copyTrack(t){ navigator.clipboard.writeText(t).then(()=>toast('Трек-номер скопирован')); }
-function downloadReceipt(id){ toast('📄 Чек #'+id+' — PDF генерируется (требует бэкенд)'); }
+function downloadReceipt(orderId){
+  const order = getOrdersByUser(currentUser.id).find(o => o.id === orderId)
+              || JSON.parse(localStorage.getItem('lm_orders')||'[]').find(o => o.id === orderId);
+  if(!order){ toast('Заказ не найден','⚠️'); return; }
+
+  if(typeof window.jspdf === 'undefined'){
+    toast('PDF-библиотека загружается... повторите','⏳'); return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const mx = 48; // margin X
+  const cream = [250, 242, 234];
+  const darkBrown = [42, 26, 16];
+  const rose = [212, 144, 126];
+  const muted = [140, 110, 96];
+  const mid = [100, 80, 65];
+  const white = [255, 255, 255];
+
+  // ── Background ──────────────────────────────────
+  doc.setFillColor(...cream);
+  doc.rect(0, 0, W, H, 'F');
+
+  // ── Header bar ──────────────────────────────────
+  doc.setFillColor(...darkBrown);
+  doc.rect(0, 0, W, 88, 'F');
+
+  // Rose accent line
+  doc.setFillColor(...rose);
+  doc.rect(0, 88, W, 3, 'F');
+
+  // Logo text
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(28);
+  doc.setTextColor(...white);
+  doc.text('LUMIÈRE', mx, 52);
+
+  // Tagline
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...rose);
+  doc.text('LUXURY BEAUTY · KAZAKHSTAN', mx, 68);
+
+  // Receipt label (right side of header)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...white);
+  doc.text('КЧЕ К / RECEIPT', W - mx, 45, { align:'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(180, 160, 150);
+  doc.text('lumiere.kz', W - mx, 62, { align:'right' });
+
+  // ── Order info card ──────────────────────────────
+  const infoY = 112;
+  doc.setFillColor(...white);
+  doc.roundedRect(mx, infoY, W - mx*2, 90, 8, 8, 'F');
+
+  // Order id
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(...darkBrown);
+  doc.text('# ' + order.id.toUpperCase(), mx + 16, infoY + 30);
+
+  // Status pill
+  const statusLabels = {processing:'В обработке', transit:'В пути', in_transit:'В пути', delivered:'Доставлено', cancelled:'Отменён', confirmed:'Подтверждён'};
+  const statusColors = {processing:[255,180,60], transit:[60,130,220], in_transit:[60,130,220], delivered:[50,170,90], cancelled:[200,60,60], confirmed:[100,180,100]};
+  const sLabel = statusLabels[order.status] || order.status;
+  const sColor = statusColors[order.status] || rose;
+  const pillX = W - mx - 16;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(...white);
+  const pillW = doc.getTextWidth(sLabel) + 20;
+  doc.setFillColor(...sColor);
+  doc.roundedRect(pillX - pillW, infoY + 12, pillW, 18, 5, 5, 'F');
+  doc.text(sLabel, pillX - pillW/2, infoY + 24, { align:'center' });
+
+  // Date and address
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  const dateStr = new Date(order.date).toLocaleDateString('ru-RU', {day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  doc.text('Дата: ' + dateStr, mx + 16, infoY + 52);
+  const addrLine = order.address || '—';
+  doc.text('Адрес: ' + addrLine, mx + 16, infoY + 68);
+  if(order.track){
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...rose);
+    doc.text('Трек: ' + order.track, mx + 16, infoY + 82);
+  }
+
+  // ── Customer info ────────────────────────────────
+  const custY = infoY + 110;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...muted);
+  doc.text('ПОКУПАТЕЛЬ', mx, custY);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...darkBrown);
+  doc.text(currentUser.full_name, mx, custY + 14);
+  doc.setTextColor(...mid);
+  doc.text(currentUser.email, mx, custY + 27);
+  if(currentUser.phone) doc.text(currentUser.phone, mx, custY + 40);
+
+  // ── Items table ──────────────────────────────────
+  const tableY = custY + 64;
+
+  // Table header bg
+  doc.setFillColor(...darkBrown);
+  doc.roundedRect(mx, tableY, W - mx*2, 26, 5, 5, 'F');
+  // Square out bottom corners manually
+  doc.rect(mx, tableY + 15, W - mx*2, 11, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...white);
+  doc.text('ТОВАР', mx + 12, tableY + 17);
+  doc.text('КОЛ-ВО', W*0.62, tableY + 17, { align:'center' });
+  doc.text('ЦЕНА', W*0.77, tableY + 17, { align:'center' });
+  doc.text('СУММА', W - mx - 12, tableY + 17, { align:'right' });
+
+  // Rows
+  let rowY = tableY + 26;
+  const items = order.items || [];
+  items.forEach((item, i) => {
+    const rowH = 32;
+    const bg = i % 2 === 0 ? white : [245, 238, 230];
+    doc.setFillColor(...bg);
+    doc.rect(mx, rowY, W - mx*2, rowH, 'F');
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...darkBrown);
+    // Truncate long names
+    const nameLines = doc.splitTextToSize(item.name, W*0.46 - 30);
+    doc.text(nameLines[0], mx + 12, rowY + 20);
+
+    doc.setTextColor(...mid);
+    doc.text(String(item.qty), W*0.62, rowY + 20, { align:'center' });
+
+    const unitPrice = item.price ? item.price.toLocaleString('ru-KZ') : '—';
+    doc.text('₸ ' + unitPrice, W*0.77, rowY + 20, { align:'center' });
+
+    const lineTotal = item.price ? (item.price * item.qty).toLocaleString('ru-KZ') : '—';
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...darkBrown);
+    doc.text('₸ ' + lineTotal, W - mx - 12, rowY + 20, { align:'right' });
+
+    rowY += rowH;
+  });
+
+  // Table bottom border
+  doc.setDrawColor(...rose);
+  doc.setLineWidth(1.5);
+  doc.line(mx, rowY, W - mx, rowY);
+
+  // ── Totals ───────────────────────────────────────
+  const totY = rowY + 18;
+
+  // Subtotal
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...mid);
+  doc.text('Подытог:', W*0.72, totY, { align:'right' });
+  doc.text('₸ ' + order.total.toLocaleString('ru-KZ'), W - mx - 12, totY, { align:'right' });
+
+  // Delivery
+  doc.text('Доставка:', W*0.72, totY + 16, { align:'right' });
+  doc.setTextColor(...[50,160,80]);
+  doc.text('Бесплатно', W - mx - 12, totY + 16, { align:'right' });
+
+  // Total box
+  const totalBoxY = totY + 28;
+  doc.setFillColor(...darkBrown);
+  doc.roundedRect(W*0.58, totalBoxY, W*0.42 - mx, 32, 6, 6, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...rose);
+  doc.text('ИТОГО', W*0.65, totalBoxY + 14);
+  doc.setFontSize(15);
+  doc.setTextColor(...white);
+  doc.text('₸ ' + order.total.toLocaleString('ru-KZ'), W - mx - 12, totalBoxY + 22, { align:'right' });
+
+  // ── Barcode-style decoration ──────────────────────
+  const bcY = totalBoxY + 56;
+  const bcX = mx;
+  const bcW = 120;
+  const bcH = 32;
+  // Draw thin vertical bars to simulate barcode
+  doc.setFillColor(...darkBrown);
+  const barWidths = [2,1,3,1,2,1,1,2,3,1,2,1,3,2,1,1,2,3,1,2,1,1,3,2,1,2,1,3,1,2,1,2,3,1,1,2,3,1,2,1];
+  let bx = bcX;
+  barWidths.forEach((bw, bi) => {
+    if(bi % 2 === 0) doc.rect(bx, bcY, bw, bcH, 'F');
+    bx += bw + 1;
+  });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(...muted);
+  doc.text(order.id.toUpperCase() + '-' + new Date(order.date).getFullYear(), bcX, bcY + bcH + 10);
+
+  // ── Footer ───────────────────────────────────────
+  const footY = H - 54;
+  doc.setFillColor(...darkBrown);
+  doc.rect(0, footY, W, 54, 'F');
+  doc.setFillColor(...rose);
+  doc.rect(0, footY, W, 2, 'F');
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(180, 160, 150);
+  doc.text('Спасибо за покупку в LUMIÈRE · lumiere.kz', W/2, footY + 18, { align:'center' });
+  doc.text('Казахстан, г. Алматы · +7 (727) 000-00-00 · support@lumiere.kz', W/2, footY + 32, { align:'center' });
+  doc.setTextColor(...rose);
+  doc.text('Этот документ является подтверждением вашего заказа', W/2, footY + 46, { align:'center' });
+
+  // ── Save ─────────────────────────────────────────
+  doc.save('LUMIERE_Chek_' + order.id + '.pdf');
+  toast('📄 Чек #' + order.id + ' скачан');
+}
 function repeatOrder(id){ const o=getOrdersByUser(currentUser.id).find(x=>x.id===id); if(o) toast(o.items.length+' товаров добавлены в корзину'); }
 
 // ── Wishlist ──────────────────────────────

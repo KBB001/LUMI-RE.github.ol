@@ -428,17 +428,23 @@ function doLogin(){
 function doLogout(){ logout(); location.reload(); }
 
 // Auto-login if admin session exists (use existing session, don't call login() again)
-(function(){
+(async function(){
   const s=getSession();
   if(s){
-    const u=getUserById(s.userId);
-    if(u&&u.role==='admin'){
-      adminUser=u;
-      document.getElementById('loginScreen').style.display='none';
-      document.getElementById('adminLayout').style.display='grid';
-      document.getElementById('sbUserName').textContent=u.full_name;
-      initClock();
-      refreshAll();
+    try {
+      const u=await getCurrentUser();
+      if(u&&u.role==='admin'){
+        adminUser=u;
+        document.getElementById('loginScreen').style.display='none';
+        document.getElementById('adminLayout').style.display='grid';
+        document.getElementById('sbUserName').textContent=u.full_name;
+        initClock();
+        await refreshAll();
+      } else if(u&&u.role!=='admin') {
+        toast('Доступ запрещён — нет прав администратора','🚫');
+      }
+    } catch(e) {
+      console.warn('Auto-login failed:', e);
     }
   }
 })();
@@ -460,28 +466,26 @@ function goTab(id, idx){
 }
 
 // ── Refresh all ──────────────────────
-function refreshAll(){
-  renderDashboard();
-  renderProducts();
-  renderOrders();
-  renderUsers();
+async function refreshAll(){
+  await Promise.all([renderDashboard(), renderProducts(), renderOrders(), renderUsers()]);
   renderNotifications();
 }
 
 // ── DASHBOARD ────────────────────────
-function renderDashboard(){
-  const orders=getAllOrders();
-  const products=getProducts();
-  const users=getUsers();
-  const stock=getStock();
+async function renderDashboard(){
+  const [orders, products, users, stock] = await Promise.all([
+    getAllOrders(), getProducts(), getUsers(), getStock()
+  ]);
+  if(!Array.isArray(orders)||!Array.isArray(products)) return;
 
-  const revenue=orders.reduce((s,o)=>s+o.total,0);
+  const revenue=orders.reduce((s,o)=>s+(Number(o.total)||0),0);
   document.getElementById('dRevenue').textContent='₸ '+revenue.toLocaleString('ru-KZ');
   document.getElementById('dOrders').textContent=orders.length;
-  document.getElementById('dUsers').textContent=users.length;
+  document.getElementById('dUsers').textContent=Array.isArray(users)?users.length:0;
   document.getElementById('dProducts').textContent=products.length;
 
-  const lowCount=products.filter(p=>(stock[p.id]||0)<5).length;
+  const stockMap=stock&&typeof stock==='object'?stock:{};
+  const lowCount=products.filter(p=>(stockMap[p.id]||0)<5).length;
   document.getElementById('dLowstock').textContent=lowCount+' с критичным остатком';
 
   // Pending orders badge
@@ -502,9 +506,9 @@ function renderDashboard(){
 
   // Top products table
   document.getElementById('topProductsTbl').innerHTML=products.slice(0,5).map(p=>{
-    const qty=stock[p.id]||0;
+    const qty=stockMap[p.id]||0;
     const sc=qty===0?'stock-out':qty<5?'stock-low':'stock-ok';
-    return `<tr><td>${p.name}</td><td style="color:var(--muted)">${p.brand}</td><td>₸ ${p.price.toLocaleString('ru-KZ')}</td><td class="${sc}">${qty} шт.</td><td><span class="badge b-${p.badge||'customer'}">${p.badge||'—'}</span></td></tr>`;
+    return `<tr><td>${p.name}</td><td style="color:var(--muted)">${p.brand}</td><td>₸ ${p.price.toLocaleString('ru-KZ')}</td><td class="${sc}">${qty} шт.</td><td><span class="badge ${p.badge?'b-'+p.badge:''}}">${p.badge||'—'}</span></td></tr>`;
   }).join('');
 }
 
@@ -531,12 +535,13 @@ function markAllRead(){ getNotifications().forEach(n=>markNotifRead(n.id)); rend
 function showNotifPanel(){ goTab('dashboard',0); setTimeout(()=>document.getElementById('notifPanel').scrollIntoView({behavior:'smooth'}),100); }
 
 // ── PRODUCTS ─────────────────────────
-function renderProducts(){
+async function renderProducts(){
   const q=(document.getElementById('prodSearch').value||'').toLowerCase();
   const cat=document.getElementById('catFilter').value;
-  const stock=getStock();
-  let prods=getProducts();
-  if(q) prods=prods.filter(p=>p.name.toLowerCase().includes(q)||p.brand.toLowerCase().includes(q));
+  const [stockMap, prodsAll]=await Promise.all([getStock(), getProducts()]);
+  const stock=stockMap&&typeof stockMap==='object'?stockMap:{};
+  let prods=Array.isArray(prodsAll)?prodsAll:[];
+  if(q) prods=prods.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.brand||'').toLowerCase().includes(q));
   if(cat) prods=prods.filter(p=>p.cat===cat);
   document.getElementById('prodTbl').innerHTML=prods.map(p=>{
     const qty=stock[p.id]||0;
@@ -554,32 +559,39 @@ function renderProducts(){
         <button class="btn-icon del" onclick="delProd('${p.id}')" title="Удалить">🗑</button>
       </div></td>
     </tr>`;
-  }).join('');
+  }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Товаров не найдено</td></tr>`;
 }
 
-function inlineEdit(id,field,val){
+async function inlineEdit(id,field,val){
   val=val.trim(); if(!val) return;
-  saveProduct({id, [field]:val});
+  await saveProduct({id, [field]:val});
   toast('✓ '+field+' обновлено');
   renderProducts();
 }
-function inlineEditPrice(id,val){
+async function inlineEditPrice(id,val){
   const n=parseInt(val.replace(/\D/g,''));
   if(!n) return;
-  saveProduct({id, price:n});
+  await saveProduct({id, price:n});
   toast('✓ Цена обновлена');
   renderProducts();
 }
-function editStock(id,val){
+async function editStock(id,val){
   const n=parseInt(val.replace(/\D/g,''));
   if(isNaN(n)) return;
-  setStock(id,n);
-  if(n<5) addNotification('warning',`Низкий остаток товара: ${getProducts().find(p=>p.id===id)?.name} (${n} шт.)`);
+  await setStock(id,n);
+  if(n<5) {
+    const prods=await getProducts();
+    const name=Array.isArray(prods)?prods.find(p=>p.id===id)?.name:'';
+    addNotification('warning',`Низкий остаток товара: ${name} (${n} шт.)`);
+  }
   toast('✓ Остаток обновлён');
 }
-function delProd(id){
+async function delProd(id){
   if(!confirm('Удалить товар?')) return;
-  deleteProduct(id); renderProducts(); renderDashboard(); toast('Товар удалён');
+  const r=await deleteProduct(id);
+  if(r&&r.error){ toast(r.error,'⚠️'); return; }
+  await Promise.all([renderProducts(), renderDashboard()]);
+  toast('Товар удалён');
 }
 
 let editProdId=null;
@@ -633,68 +645,99 @@ function saveProdModal(){
 const statusLabels={processing:'В обработке',confirmed:'Подтверждён',in_transit:'В пути',transit:'В пути',delivered:'Доставлен',cancelled:'Отменён'};
 const statusCls={processing:'s-processing',confirmed:'s-confirmed',in_transit:'s-transit',transit:'s-transit',delivered:'s-delivered',cancelled:'s-cancelled'};
 
-function renderOrders(){
+async function renderOrders(){
   const q=(document.getElementById('ordSearch').value||'').toLowerCase();
   const filt=document.getElementById('ordFilter').value;
-  let orders=getAllOrders();
-  if(filt) orders=orders.filter(o=>o.status===filt);
-  if(q) orders=orders.filter(o=>o.id.toLowerCase().includes(q)||(getUserById(o.user_id)?.full_name||'').toLowerCase().includes(q));
-  document.getElementById('ordTbl').innerHTML=orders.map(o=>{
-    const user=getUserById(o.user_id);
-    const items=o.items.map(i=>i.name+'×'+i.qty).join(', ');
+
+  // Show loading placeholder
+  document.getElementById('ordTbl').innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Загрузка…</td></tr>`;
+
+  let orders=await getAllOrders();
+  if(!Array.isArray(orders)){ orders=[]; }
+
+  if(filt) orders=orders.filter(o=>o.status===filt||((filt==='in_transit')&&o.status==='transit'));
+  if(q) orders=orders.filter(o=>o.id.toLowerCase().includes(q));
+
+  // Fetch all users once for name lookup
+  const usersArr=await getUsers();
+  const usersMap={};
+  if(Array.isArray(usersArr)) usersArr.forEach(u=>{ usersMap[u.id]=u; });
+
+  // Filter by client name if query
+  const filtered=q ? orders.filter(o=>{
+    const u=usersMap[o.user_id];
+    return o.id.toLowerCase().includes(q)||(u?.full_name||'').toLowerCase().includes(q)||(u?.email||'').toLowerCase().includes(q);
+  }) : orders;
+
+  document.getElementById('ordTbl').innerHTML=filtered.map(o=>{
+    const user=usersMap[o.user_id];
+    const items=Array.isArray(o.items)?o.items:(typeof o.items==='string'?JSON.parse(o.items||'[]'):[]);
+    const itemsStr=items.map(i=>i.name+'×'+i.qty).join(', ');
+    const dateStr=o.date?new Date(o.date).toLocaleDateString('ru-KZ'):'—';
     return `<tr>
       <td style="font-size:10px;font-weight:700">#${o.id}</td>
       <td>${user?user.full_name:'—'}<br/><span style="font-size:10px;color:var(--muted)">${user?.email||''}</span></td>
-      <td style="max-width:160px;font-size:11px;color:var(--muted)">${items}</td>
-      <td style="font-weight:600">₸ ${o.total.toLocaleString('ru-KZ')}</td>
+      <td style="max-width:160px;font-size:11px;color:var(--muted)">${itemsStr}</td>
+      <td style="font-weight:600">₸ ${(Number(o.total)||0).toLocaleString('ru-KZ')}</td>
       <td style="font-size:11px;color:var(--muted)">${o.track||'—'}</td>
       <td><span class="badge ${statusCls[o.status]||'s-processing'}">${statusLabels[o.status]||o.status}</span></td>
-      <td style="font-size:11px;color:var(--muted)">${new Date(o.date).toLocaleDateString('ru-KZ')}</td>
+      <td style="font-size:11px;color:var(--muted)">${dateStr}</td>
       <td><div class="btn-row">
         <button class="btn-icon" onclick="openOrdModal('${o.id}')" title="Управление">✏️</button>
         <button class="btn-icon del" onclick="delOrd('${o.id}')" title="Удалить">🗑</button>
       </div></td>
     </tr>`;
-  }).join('');
+  }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Заказов не найдено</td></tr>`;
+
   // update badge
-  const pending=getAllOrders().filter(o=>o.status==='processing'||o.status==='confirmed').length;
+  const pending=orders.filter(o=>o.status==='processing'||o.status==='confirmed').length;
   document.getElementById('ordBadge').textContent=pending;
 }
 
-function openOrdModal(id){
+async function openOrdModal(id){
   editOrdId=id;
-  const o=getAllOrders().find(x=>x.id===id);
-  const user=getUserById(o.user_id);
+  document.getElementById('ordModal').classList.add('open');
   document.getElementById('ordModalTitle').textContent='Заказ #'+id;
+  document.getElementById('ordModalBody').innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted)">Загрузка…</div>`;
+  const [allOrders, usersArr]=await Promise.all([getAllOrders(), getUsers()]);
+  const o=Array.isArray(allOrders)?allOrders.find(x=>x.id===id):null;
+  if(!o){ document.getElementById('ordModalBody').innerHTML=`<p style="color:red">Заказ не найден</p>`; return; }
+  const userObj=Array.isArray(usersArr)?usersArr.find(u=>u.id===o.user_id):null;
+  const items=Array.isArray(o.items)?o.items:(typeof o.items==='string'?JSON.parse(o.items||'[]'):[]);
+  const itemsHtml=items.map(i=>`${i.name} × ${i.qty} = ₸ ${((i.price||0)*i.qty).toLocaleString('ru-KZ')}`).join('; ');
+  const uniqueStatuses=[['processing','В обработке'],['confirmed','Подтверждён'],['in_transit','В пути'],['delivered','Доставлен'],['cancelled','Отменён']];
   document.getElementById('ordModalBody').innerHTML=`
     <div style="margin-bottom:14px;font-size:12px;line-height:1.8;color:var(--muted)">
-      <p><strong style="color:var(--text)">Клиент:</strong> ${user?.full_name||'—'} (${user?.email||''})</p>
+      <p><strong style="color:var(--text)">Клиент:</strong> ${userObj?.full_name||'—'} (${userObj?.email||''})</p>
       <p><strong style="color:var(--text)">Адрес:</strong> ${o.address||'—'}</p>
-      <p><strong style="color:var(--text)">Состав:</strong> ${o.items.map(i=>`${i.name} × ${i.qty} = ₸ ${(i.price*i.qty).toLocaleString('ru-KZ')}`).join('; ')}</p>
-      <p><strong style="color:var(--text)">Итого:</strong> ₸ ${o.total.toLocaleString('ru-KZ')}</p>
+      <p><strong style="color:var(--text)">Состав:</strong> ${itemsHtml||'—'}</p>
+      <p><strong style="color:var(--text)">Итого:</strong> ₸ ${(Number(o.total)||0).toLocaleString('ru-KZ')}</p>
     </div>
     <div class="g"><label class="lbl">Статус</label>
       <select class="inp" id="ordStatusSel">
-        ${Object.entries(statusLabels).map(([k,v])=>`<option value="${k}" ${o.status===k?'selected':''}>${v}</option>`).join('')}
+        ${uniqueStatuses.map(([k,v])=>`<option value="${k}" ${(o.status===k||(k==='in_transit'&&o.status==='transit'))?'selected':''}>${v}</option>`).join('')}
       </select>
     </div>
     <div class="g"><label class="lbl">Трек-номер</label><input type="text" class="inp" id="ordTrackInp" value="${o.track||''}" placeholder="KZ000000000"/></div>`;
-  document.getElementById('ordModal').classList.add('open');
 }
 function closeOrdModal(){ document.getElementById('ordModal').classList.remove('open'); }
-function saveOrdStatus(){
+async function saveOrdStatus(){
   const status=document.getElementById('ordStatusSel').value;
   const track=document.getElementById('ordTrackInp').value.trim();
-  updateOrderStatus(editOrdId, status, track);
+  const r=await updateOrderStatus(editOrdId, status, track);
+  if(r&&r.error){ toast(r.error,'⚠️'); return; }
   addNotification('info',`Заказ #${editOrdId}: статус изменён на "${statusLabels[status]}"`);
-  closeOrdModal(); renderOrders(); renderDashboard();
+  closeOrdModal(); await renderOrders(); renderDashboard();
   toast('Статус заказа обновлён ✓');
 }
-function delOrd(id){ if(!confirm('Удалить заказ #'+id+'?')){ return; } deleteOrder(id); renderOrders(); toast('Заказ удалён'); }
-function printOrder(){
-  const o=getAllOrders().find(x=>x.id===editOrdId);
+async function delOrd(id){ if(!confirm('Удалить заказ #'+id+'?')) return; const r=await deleteOrder(id); if(r&&r.error){ toast(r.error,'⚠️'); return; } await renderOrders(); toast('Заказ удалён'); }
+
+async function printOrder(){
+  const allOrders=await getAllOrders();
+  const o=Array.isArray(allOrders)?allOrders.find(x=>x.id===editOrdId):null;
   if(!o){ toast('Заказ не найден','⚠️'); return; }
-  const user=getUserById(o.user_id);
+  const usersArr=await getUsers();
+  const user=Array.isArray(usersArr)?usersArr.find(u=>u.id===o.user_id):null;
   const w=window.open('','_blank');
   if(!w){ toast('Popup заблокирован браузером — разрешите всплывающие окна','⚠️'); return; }
   w.document.write(`<html><head><title>Накладная #${o.id}</title></head><body style="font-family:Georgia,serif;padding:40px;max-width:600px">
@@ -714,13 +757,21 @@ function printOrder(){
 }
 
 // ── USERS ────────────────────────────
-function renderUsers(){
+async function renderUsers(){
   const q=(document.getElementById('userSearch').value||'').toLowerCase();
-  let users=getUsers();
-  if(q) users=users.filter(u=>u.full_name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q));
+  document.getElementById('userTbl').innerHTML=`<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Загрузка…</td></tr>`;
+
+  let users=await getUsers();
+  if(!Array.isArray(users)) users=[];
+  if(q) users=users.filter(u=>(u.full_name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q));
+
+  const allOrders=await getAllOrders();
+  const ordersByUser={};
+  if(Array.isArray(allOrders)) allOrders.forEach(o=>{ ordersByUser[o.user_id]=(ordersByUser[o.user_id]||0)+1; });
+
   document.getElementById('userTbl').innerHTML=users.map(u=>{
-    const orders=getOrdersByUser(u.id);
     const isBanned=u.banned;
+    const orderCount=ordersByUser[u.id]||0;
     return `<tr ${isBanned?'style="opacity:.5"':''}>
       <td style="font-size:10px;color:var(--muted)">${u.id}</td>
       <td style="font-weight:500">${u.full_name}</td>
@@ -731,30 +782,33 @@ function renderUsers(){
         <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
       </select></td>
       <td><span class="badge ${isBanned?'b-banned':u.role==='admin'?'b-admin':'b-customer'}">${isBanned?'ЗАБЛОКИРОВАН':u.role==='admin'?'ADMIN':'ACTIVE'}</span></td>
-      <td style="font-size:11px;color:var(--muted)">${new Date(u.created_at).toLocaleDateString('ru-KZ')}</td>
-      <td>${orders.length}</td>
+      <td style="font-size:11px;color:var(--muted)">${u.created_at?new Date(u.created_at).toLocaleDateString('ru-KZ'):'—'}</td>
+      <td>${orderCount}</td>
       <td><div class="btn-row">
         <button class="btn-icon ban" onclick="banUser('${u.id}')" title="${isBanned?'Разблокировать':'Заблокировать'}" ${u.id==='u1'?'disabled':''}>
           ${isBanned?'🔓':'🚫'}
         </button>
       </div></td>
     </tr>`;
-  }).join('');
+  }).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Пользователей не найдено</td></tr>`;
 }
 
-function changeRole(userId, role){
-  updateUserRole(userId, role);
-  renderUsers();
+async function changeRole(userId, role){
+  const r=await updateUserRole(userId, role);
+  if(r&&r.error){ toast(r.error,'⚠️'); return; }
+  await renderUsers();
   toast('Роль изменена на '+role+' ✓');
-  addNotification('info','Роль пользователя изменена: '+getUserById(userId)?.full_name+' → '+role);
+  addNotification('info','Роль пользователя изменена → '+role);
 }
-function banUser(userId){
-  const u=getUserById(userId);
+async function banUser(userId){
+  const usersArr=await getUsers();
+  const u=Array.isArray(usersArr)?usersArr.find(x=>x.id===userId):null;
   if(!u) return;
   const nowBanned=!u.banned;
-  toggleUserBan(userId);
+  const r=await toggleUserBan(userId);
+  if(r&&r.error){ toast(r.error,'⚠️'); return; }
   if(getSession()?.userId===userId&&nowBanned){ logout(); location.reload(); return; }
-  renderUsers();
+  await renderUsers();
   toast(nowBanned?'Пользователь заблокирован':'Пользователь разблокирован');
   addNotification(nowBanned?'warning':'info',(nowBanned?'Заблокирован':'Разблокирован')+': '+u.full_name);
 }
