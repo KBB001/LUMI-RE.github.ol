@@ -7,8 +7,9 @@
 
 const PRODUCT_DB = {};
 
-function syncProductDb(){
-  getProducts().forEach(p => { PRODUCT_DB[p.id] = p; });
+async function syncProductDb(){
+  const products = await getProducts();
+  if (Array.isArray(products)) products.forEach(p => { PRODUCT_DB[p.id] = p; });
 }
 
 // Featured items (static, always available)
@@ -18,9 +19,6 @@ function addFeatured(){
   PRODUCT_DB['f3'] = { id:'f3', brand:'Jo Malone', name:'English Pear & Freesia', price:89000, oldPrice:null, badge:'Limited', stars:'★★★★☆', reviews:534, art:'fpi-3', desc:'Элегантный британский парфюм с нотами свежей груши, белой амбры и нарцисса. Именно этим ароматом заканчивается лето.', colors:[] };
 }
 
-syncProductDb();
-addFeatured();
-
 
 // ─── Cart State ──────────────────────
 let cart = [];
@@ -28,11 +26,11 @@ let modalQty = 1;
 let modalProductId = null;
 
 // ─── Session-aware navbar ─────────────
-function initAuthUI(){
+async function initAuthUI(){
   try {
     const sess = getSession();
     if(!sess) return;
-    const user = getUserById(sess.userId);
+    const user = await getUserById(sess.userId);
     const dot = document.getElementById('navUserDot');
     const adminBtn = document.getElementById('navAdminBtn');
     if (dot) dot.style.display = 'block';
@@ -57,8 +55,8 @@ function toast(msg, icon='✓'){
 }
 
 // ─── Cart ────────────────────────────
-function addToCart(productId, qty=1){
-  syncProductDb(); // ensure latest products are in PRODUCT_DB
+async function addToCart(productId, qty=1){
+  await syncProductDb(); // ensure latest products are in PRODUCT_DB
   const p = PRODUCT_DB[productId];
   if(!p) return;
   const existing = cart.find(i => i.id === productId);
@@ -200,9 +198,11 @@ document.getElementById('overlay').addEventListener('click', () => {
 let shownCount = 8;
 let activeFilter = 'all';
 
-function renderProducts(){
-  syncProductDb(); // always pull latest from db.js
-  const PRODUCTS = getProducts();
+async function renderProducts(){
+  await syncProductDb(); // always pull latest from db.js
+  const PRODUCTS = await getProducts();
+  if(!Array.isArray(PRODUCTS)) return;
+  
   const grid = document.getElementById('productsGrid');
   const filtered = activeFilter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === activeFilter);
   const visible = filtered.slice(0, shownCount);
@@ -254,12 +254,12 @@ function renderProducts(){
       e.stopPropagation();
       openQuickView(p.id);
     });
-    card.querySelector('.pc-wishlist').addEventListener('click', function(e){
+    card.querySelector('.pc-wishlist').addEventListener('click', async function(e){
       e.stopPropagation();
       try {
         const sess = getSession();
         if(sess) {
-          const inWish = toggleWishlist(sess.userId, p.id);
+          const inWish = await toggleWishlist(sess.userId, p.id);
           this.classList.toggle('wished', inWish);
           this.textContent = inWish ? '♥' : '♡';
         } else {
@@ -273,21 +273,26 @@ function renderProducts(){
         this.textContent = this.classList.contains('wished') ? '♥' : '♡';
       }
     });
-    // Restore wishlist state from db.js
-    try {
-      const sess = getSession();
-      if(sess) {
-        const wish = getWishlist(sess.userId);
-        const btn = card.querySelector('.pc-wishlist');
-        if(wish.includes(p.id)){ btn.classList.add('wished'); btn.textContent='♥'; }
-      }
-    } catch(e){}
 
     grid.appendChild(card);
   });
 
   const btn = document.getElementById('loadMoreBtn');
   btn.style.display = filtered.length > shownCount ? 'inline-flex' : 'none';
+
+  // Restore wishlist state async
+  try {
+    const sess = getSession();
+    if(sess) {
+      const wish = await getWishlist(sess.userId);
+      visible.forEach(p => {
+        if(wish.includes(p.id)){
+          const btn = Array.from(grid.querySelectorAll('.pc-wishlist')).find(b => b.dataset.id == p.id);
+          if(btn) { btn.classList.add('wished'); btn.textContent='♥'; }
+        }
+      });
+    }
+  } catch(e){}
 }
 
 // Filter tabs
@@ -337,33 +342,41 @@ document.querySelectorAll('.mnl').forEach(a => a.addEventListener('click', close
 
 // ─── Testimonials carousel ───────────
 const track = document.getElementById('testimonialsTrack');
-const cards = track.querySelectorAll('.testi-card');
+const cards = track ? track.querySelectorAll('.testi-card') : [];
 const dotsContainer = document.getElementById('testiDots');
 let testiIdx = 0;
 
-cards.forEach((_,i) => {
-  const d = document.createElement('button');
-  d.className = 'td' + (i===0?' active':'');
-  d.addEventListener('click', () => scrollToTesti(i));
-  dotsContainer.appendChild(d);
-});
+if (dotsContainer) {
+  cards.forEach((_,i) => {
+    const d = document.createElement('button');
+    d.className = 'td' + (i===0?' active':'');
+    d.addEventListener('click', () => scrollToTesti(i));
+    dotsContainer.appendChild(d);
+  });
+}
 
 function scrollToTesti(idx){
+  if(cards.length === 0) return;
   testiIdx = Math.max(0, Math.min(idx, cards.length-1));
   const card = cards[testiIdx];
   track.scrollTo({ left: card.offsetLeft - 60, behavior: 'smooth' });
-  dotsContainer.querySelectorAll('.td').forEach((d,i) => d.classList.toggle('active', i===testiIdx));
+  if (dotsContainer) dotsContainer.querySelectorAll('.td').forEach((d,i) => d.classList.toggle('active', i===testiIdx));
 }
-document.getElementById('testiPrev').addEventListener('click', () => scrollToTesti(testiIdx-1));
-document.getElementById('testiNext').addEventListener('click', () => scrollToTesti(testiIdx+1));
+
+const testiPrev = document.getElementById('testiPrev');
+const testiNext = document.getElementById('testiNext');
+if (testiPrev) testiPrev.addEventListener('click', () => scrollToTesti(testiIdx-1));
+if (testiNext) testiNext.addEventListener('click', () => scrollToTesti(testiIdx+1));
 
 // ─── Newsletter ───────────────────────
 function submitNewsletter(e){
   e.preventDefault();
   const form = document.getElementById('nlForm');
-  form.innerHTML = `<p style="color:var(--blush);font-family:var(--font-s);font-size:22px;text-align:center">
-    ✓ Вы подписаны!<br/><span style="font-size:14px;color:rgba(248,242,234,.5);font-family:var(--font-u)">Спасибо, следите за новинками</span>
-  </p>`;
+  if(form) {
+    form.innerHTML = \`<p style="color:var(--blush);font-family:var(--font-s);font-size:22px;text-align:center">
+      ✓ Вы подписаны!<br/><span style="font-size:14px;color:rgba(248,242,234,.5);font-family:var(--font-u)">Спасибо, следите за новинками</span>
+    </p>\`;
+  }
 }
 window.submitNewsletter = submitNewsletter;
 
@@ -408,21 +421,15 @@ window.addEventListener('scroll', () => {
   }
 }, { passive: true });
 
-
-// ─── Session-aware UI ─────────────────
-function initAuthUI(){
-  const sess = typeof getSession === 'function' ? getSession() : null;
-  const user = sess ? (typeof getUserById === 'function' ? getUserById(sess.userId) : null) : null;
-  const dot = document.getElementById('navUserDot');
-  const adminBtn = document.getElementById('navAdminBtn');
-  if(user && dot) dot.style.display = 'block';
-  if(user && user.role === 'admin' && adminBtn) adminBtn.style.display = 'flex';
-}
-
 // ─── Init ─────────────────────────────
-initAuthUI();
-renderProducts();
-updateCartUI();
+async function initApp() {
+  await initAuthUI();
+  await syncProductDb();
+  addFeatured();
+  await renderProducts();
+  updateCartUI();
+}
+initApp();
 
 console.log('%c✦ LUMIÈRE', 'font-family:serif;font-size:24px;color:#D4907E');
 console.log('%cLuxury Beauty · Kazakhstan · ₸ KZT', 'font-size:12px;color:#8C6E60');

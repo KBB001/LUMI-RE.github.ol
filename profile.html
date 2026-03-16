@@ -583,16 +583,7 @@ function removeAvatar(){
   saveProfile(new Event('submit'));
 }
 
-function updateBadges() {
-  const orders = getOrdersByUser(currentUser.id);
-  const activeOrders = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
-  const ob = document.getElementById('ordersBadge');
-  if(activeOrders > 0){ ob.textContent = activeOrders; ob.classList.remove('hidden'); } else { ob.classList.add('hidden'); }
-
-  const wish = getWishlist(currentUser.id);
-  const wb = document.getElementById('wishBadge');
-  if(wish.length > 0){ wb.textContent = wish.length; wb.classList.remove('hidden'); } else { wb.classList.add('hidden'); }
-}
+async function updateBadges() {\n  const orders = await getOrdersByUser(currentUser.id);\n  const activeOrders = (orders||[]).filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;\n  const ob = document.getElementById('ordersBadge');\n  if(activeOrders > 0){ ob.textContent = activeOrders; ob.classList.remove('hidden'); } else { ob.classList.add('hidden'); }\n\n  const wish = await getWishlist(currentUser.id);\n  const wb = document.getElementById('wishBadge');\n  if((wish||[]).length > 0){ wb.textContent = wish.length; wb.classList.remove('hidden'); } else { wb.classList.add('hidden'); }\n}
 
 
 // ── Orders ────────────────────────────────
