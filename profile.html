@@ -785,9 +785,17 @@ async function changePassword(e){
   
   err.classList.add('hidden');
   
-  const r = await api('PUT', '/auth/password', { oldPass: old, newPass: nw });
-  if(r.error){
-    err.textContent=r.error; err.classList.remove('hidden'); return;
+  // In GitHub Pages demo mode - simple password update
+  if (window.IS_GITHUB_PAGES || location.hostname.includes('github.io') || location.hostname.includes('github.ol')) {
+    const users = JSON.parse(localStorage.getItem('lm_mock_users') || '[]');
+    const idx = users.findIndex(u => u.id === currentUser.id);
+    if (idx === -1) { err.textContent='Пользователь не найден'; err.classList.remove('hidden'); return; }
+    if (users[idx]._pass !== old) { err.textContent='Неверный текущий пароль'; err.classList.remove('hidden'); return; }
+    users[idx]._pass = nw;
+    localStorage.setItem('lm_mock_users', JSON.stringify(users));
+  } else {
+    const r = await api('PUT', '/auth/password', { old_password: old, new_password: nw });
+    if(r && r.error){ err.textContent=r.error; err.classList.remove('hidden'); return; }
   }
   
   document.getElementById('passOld').value = '';

@@ -25,12 +25,13 @@ let cart = [];
 let modalQty = 1;
 let modalProductId = null;
 
-// ─── Session-aware navbar ─────────────
+// ─── Session-aware navbar ─────────────────
 async function initAuthUI(){
   try {
     const sess = getSession();
     if(!sess) return;
-    const user = await getUserById(sess.userId);
+    // Use /auth/me (works for all users, not admin-only)
+    const user = await getCurrentUser();
     const dot = document.getElementById('navUserDot');
     const adminBtn = document.getElementById('navAdminBtn');
     if (dot) dot.style.display = 'block';

@@ -224,6 +224,15 @@
       .auth-visual{display:none}
       .auth-form-side{padding:24px 16px}
       .social-btns{flex-direction:column}
+      .auth-box{max-width:100%}
+      .auth-head h1{font-size:26px}
+      .auth-layout{display:block}
+    }
+    @media(max-width:480px){
+      .auth-form-side{padding:20px 14px}
+      .form-input{padding:12px 14px;font-size:15px}
+      .btn-primary,.btn-secondary{padding:14px;font-size:15px}
+      .step-bar{margin-bottom:24px}
     }
   </style>
 </head>
@@ -374,9 +383,19 @@
 'use strict';
 
 // ── Redirect if already logged in ──────
-(function(){
+// Only redirect if there's a valid token (not just stale localStorage)
+(async function(){
+  const token = localStorage.getItem('lm_jwt');
   const s = getSession();
-  if (s) window.location.href = 'profile.html';
+  if (token && s) {
+    // Verify session is actually valid
+    try {
+      const user = await getCurrentUser();
+      if (user) window.location.href = 'profile.html';
+    } catch(e) {
+      // Session invalid — stay on register page
+    }
+  }
 })();
 
 let currentStep = 0;
@@ -396,30 +415,45 @@ function setStep(n) {
 function goBack(n) { setStep(n - 1); }
 
 // ── Step 1 → 2 ──────────────────────────
-function goStep1() {
+async function goStep1() {
   const name  = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const err   = document.getElementById('err0');
+  const btn   = document.querySelector('#step0 .btn-primary');
 
   if (name.length < 2) { showErr(err, 'Введите имя и фамилию (минимум 2 символа)'); highlight('regName'); return; }
   if (!email.includes('@') || !email.includes('.')) { showErr(err, 'Введите корректный email адрес'); highlight('regEmail'); return; }
 
-  // Check duplicate email immediately
-  const exists = getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
-  if (exists) {
-    showErr(err, `Email ${email} уже зарегистрирован. <a href="profile.html" style="color:#c04040;font-weight:600">Войти →</a>`);
-    highlight('regEmail'); return;
+  // Check duplicate email on server (async)
+  btn.disabled = true;
+  btn.textContent = 'Проверка...';
+  try {
+    const users = await getUsers();
+    if (Array.isArray(users)) {
+      const exists = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (exists) {
+        showErr(err, `Email ${email} уже зарегистрирован. <a href="profile.html" style="color:#c04040;font-weight:600">Войти →</a>`);
+        highlight('regEmail');
+        return;
+      }
+    }
+  } catch(e) {
+    // Server unavailable — skip duplicate check, proceed
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Продолжить →';
   }
   err.classList.remove('show');
   setStep(1);
 }
 
 // ── Step 2 → 3 ──────────────────────────
-function goStep2() {
+async function goStep2() {
   const pass  = document.getElementById('regPass').value;
   const pass2 = document.getElementById('regPass2').value;
   const terms = document.getElementById('agreeTerms').checked;
   const err   = document.getElementById('err1');
+  const btn   = document.querySelector('#step1 .btn-primary');
 
   if (pass.length < 6) { showErr(err, 'Пароль должен содержать не менее 6 символов'); highlight('regPass'); return; }
   if (pass !== pass2)  { showErr(err, 'Пароли не совпадают'); highlight('regPass2'); return; }
@@ -429,12 +463,23 @@ function goStep2() {
   const email = document.getElementById('regEmail').value.trim();
   const phone = '+7' + document.getElementById('regPhone').value.replace(/\D/g,'');
 
-  const result = register(name, email, pass, phone);
-  if (result.error) { showErr(err, result.error); return; }
-
-  // Success!
-  document.getElementById('successName').textContent = `Добро пожаловать, ${name.split(' ')[0]}! 🌸`;
-  setStep(2);
+  btn.disabled = true;
+  btn.textContent = 'Создаём аккаунт...';
+  try {
+    const result = await register(name, email, pass, phone);
+    if (result && result.error) {
+      showErr(err, result.error);
+      return;
+    }
+    // Success!
+    document.getElementById('successName').textContent = `Добро пожаловать, ${name.split(' ')[0]}! 🌸`;
+    setStep(2);
+  } catch(e) {
+    showErr(err, 'Ошибка соединения с сервером. Убедитесь что backend запущен.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Создать аккаунт';
+  }
 }
 
 // ── Go to profile ───────────────────────

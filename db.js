@@ -1,27 +1,28 @@
 /**
  * ═══════════════════════════════════════════════════════════════
  *  LUMIÈRE — API Client Layer  (db.js)
- *  Replaces the old localStorage simulation with real fetch() calls.
  *
- *  Backend must be running at http://localhost:3000
- *  Start it: cd backend && npm install && node seed.js && node server.js
+ *  Режим 1 (локально / Render.com): подключается к backend API
+ *  Режим 2 (GitHub Pages без backend): работает с mock-данными
  * ═══════════════════════════════════════════════════════════════
  */
 'use strict';
 
 // ── Config ────────────────────────────────────────────────────
-// 1. Для работы на вашем ПК (локально):
-const API_BASE = 'http://localhost:3000/api';
+// Для работы на вашем ПК (локально):
+// const API_BASE = 'http://localhost:3000/api';
 
-// 2. Для интернета (когда загрузите сервер на Render.com):
-// Закомментируйте строку выше (поставьте //) и раскомментируйте строку ниже,
-// вставив туда вашу ссылку от Render:
+// Для Render.com (раскомментируйте и вставьте вашу ссылку):
 // const API_BASE = 'https://lumiere-api-XXXX.onrender.com/api';
 
+// Автоматический выбор: localhost локально, пустую строку — на GitHub Pages
+const IS_GITHUB_PAGES = location.hostname.includes('github.io') || location.hostname.includes('github.ol');
+const API_BASE = IS_GITHUB_PAGES ? '' : 'http://localhost:3000/api';
+
 // ── Token storage ─────────────────────────────────────────────
-function getToken()          { return localStorage.getItem('lm_jwt'); }
-function setToken(t)         { localStorage.setItem('lm_jwt', t); }
-function removeToken()       { localStorage.removeItem('lm_jwt'); }
+function getToken()    { return localStorage.getItem('lm_jwt'); }
+function setToken(t)   { localStorage.setItem('lm_jwt', t); }
+function removeToken() { localStorage.removeItem('lm_jwt'); }
 
 // ── HTTP helpers ──────────────────────────────────────────────
 function authHeaders() {
@@ -31,19 +32,51 @@ function authHeaders() {
 }
 
 async function api(method, path, body) {
+  if (!API_BASE) return { error: 'offline' };
   const opts = { method, headers: authHeaders() };
   if (body !== undefined) opts.body = JSON.stringify(body);
   try {
     const r = await fetch(API_BASE + path, opts);
     return r.json();
   } catch (e) {
-    console.error('[API]', method, path, e);
-    return { error: 'Сервер недоступен. Убедитесь что backend запущен.' };
+    console.warn('[API]', method, path, '→ offline');
+    return { error: 'offline' };
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+//  MOCK DATA — отображается когда backend недоступен
+// ══════════════════════════════════════════════════════════════
+const MOCK_PRODUCTS = [
+  { id:'p1', brand:'Chanel', name:'N°5 Eau de Parfum', cat:'fragrance', price:95000, oldPrice:null, badge:'hit', stars:'★★★★★', reviews:3241, art:'pa-perfume', desc:'Культовый аромат. Символ утончённости и элегантности. Нотки альдегидов, жасмина и ванили.' },
+  { id:'p2', brand:'La Mer', name:'Moisturizing Cream', cat:'skincare', price:148000, oldPrice:null, badge:'new', stars:'★★★★★', reviews:1892, art:'pa-cream', desc:'Легендарный увлажняющий крем с Miracle Broth™. Восстанавливает и трансформирует кожу.' },
+  { id:'p3', brand:'NARS', name:'Sheer Glow Foundation', cat:'makeup', price:32000, oldPrice:38000, badge:'sale', stars:'★★★★☆', reviews:876, art:'pa-serum', desc:'Тональная основа с натуральным сиянием. 36 оттенков. Стойкость до 16 часов.' },
+  { id:'p4', brand:'Charlotte Tilbury', name:'Magic Cream', cat:'skincare', price:45000, oldPrice:null, badge:'hit', stars:'★★★★★', reviews:2104, art:'pa-cream', desc:'Любимый крем звёзд. Мгновенное сияние и интенсивное увлажнение за 10 минут.' },
+  { id:'p5', brand:'Dior', name:'Rouge Dior Lipstick', cat:'makeup', price:28000, oldPrice:null, badge:'new', stars:'★★★★★', reviews:543, art:'pa-lipstick', desc:'Культовая губная помада. 100 оттенков. Кремовая текстура с уходом для губ.' },
+  { id:'p6', brand:'Jo Malone', name:'Peony & Blush Suede', cat:'fragrance', price:78000, oldPrice:85000, badge:'sale', stars:'★★★★★', reviews:712, art:'pa-perfume', desc:'Чувственный аромат пионов, нектарина и замши. Олицетворение женственности.' },
+  { id:'p7', brand:'Lancôme', name:'Génifique Serum', cat:'skincare', price:62000, oldPrice:null, badge:'hit', stars:'★★★★★', reviews:1567, art:'pa-serum', desc:'Передовая сыворотка с пробиотиками. Улучшает кожу за 7 дней. Дерматологически протестирована.' },
+  { id:'p8', brand:'MAC', name:'Prep + Prime Fix+', cat:'body', price:15000, oldPrice:18000, badge:'sale', stars:'★★★★☆', reviews:2891, art:'pa-serum', desc:'Фиксатор макияжа и увлажняющий спрей. Делает кожу свежей и сияющей в течение дня.' },
+  { id:'p9', brand:'Armani', name:'Luminous Silk Foundation', cat:'makeup', price:42000, oldPrice:null, badge:'new', stars:'★★★★★', reviews:1234, art:'pa-serum', desc:'Тональная основа с шёлковой текстурой. Второе место в рейтинге бестселлеров мира.' },
+  { id:'p10', brand:'Chanel', name:'Le Blanc Serum', cat:'skincare', price:88000, oldPrice:null, badge:'new', stars:'★★★★★', reviews:432, art:'pa-serum', desc:'Роскошная отбеливающая сыворотка. Выравнивает тон, придаёт сияние и увлажняет.' },
+  { id:'p11', brand:'Bobbi Brown', name:'Extra Face Oil', cat:'skincare', price:55000, oldPrice:60000, badge:'sale', stars:'★★★★☆', reviews:876, art:'pa-oil', desc:'Питательное масло для лица с экстрактом моркови. Восстанавливает и придаёт свежесть.' },
+  { id:'p12', brand:'NARS', name:'Blush — Orgasm', cat:'makeup', price:25000, oldPrice:null, badge:'hit', stars:'★★★★★', reviews:4512, art:'pa-blush', desc:'Самые популярные румяна в мире. Золотистый персиковый оттенок подходит для любого тона кожи.' },
+];
+
+// Mock "пользователи" для демо-режима (хранятся в localStorage)
+function getMockUsers() {
+  return JSON.parse(localStorage.getItem('lm_mock_users') || '[]');
+}
+function saveMockUsers(users) {
+  localStorage.setItem('lm_mock_users', JSON.stringify(users));
+}
+
 // ── PRODUCTS ──────────────────────────────────────────────────
-async function getProducts()         { return api('GET', '/products'); }
+async function getProducts() {
+  if (IS_GITHUB_PAGES) return MOCK_PRODUCTS;
+  const r = await api('GET', '/products');
+  if (r && r.error === 'offline') return MOCK_PRODUCTS;
+  return Array.isArray(r) ? r : MOCK_PRODUCTS;
+}
 async function saveProduct(product)  { return product.id ? api('PUT', '/products/' + product.id, product) : api('POST', '/products', product); }
 async function deleteProduct(id)     { return api('DELETE', '/products/' + id); }
 
@@ -52,10 +85,23 @@ async function getStock()            { return api('GET', '/stock'); }
 async function setStock(productId, qty) { return api('PUT', '/stock/' + productId, { qty }); }
 
 // ── USERS ─────────────────────────────────────────────────────
-async function getUsers()            { return api('GET', '/users'); }
-async function getUserById(id)       { return api('GET', '/users/' + id); }
+async function getUsers() {
+  if (IS_GITHUB_PAGES) return getMockUsers();
+  const r = await api('GET', '/users');
+  if (r && r.error) return getMockUsers();
+  return r;
+}
+async function getUserById(id) {
+  if (IS_GITHUB_PAGES) return getMockUsers().find(u => u.id === id) || null;
+  return api('GET', '/users/' + id);
+}
 async function updateUser(userId, changes) {
-  // If changing own profile — use /auth/me
+  if (IS_GITHUB_PAGES) {
+    const users = getMockUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx !== -1) { Object.assign(users[idx], changes); saveMockUsers(users); return users[idx]; }
+    return { error: 'User not found' };
+  }
   const sess = getSession();
   if (sess && sess.userId === userId) return api('PUT', '/auth/me', changes);
   return api('PUT', '/users/' + userId, changes);
@@ -65,10 +111,25 @@ async function toggleUserBan(userId)        { return api('PUT', '/users/' + user
 
 // ── AUTH ──────────────────────────────────────────────────────
 async function login(email, password) {
+  if (IS_GITHUB_PAGES) {
+    // Mock login
+    const users = getMockUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!user) return { error: 'Неверный email или пароль' };
+    if (user.banned) return { error: 'Аккаунт заблокирован' };
+    // Simple password check (mock — no hashing in demo)
+    if (user._pass !== password) return { error: 'Неверный email или пароль' };
+    const mockToken = 'mock_token_' + Date.now();
+    setToken(mockToken);
+    localStorage.setItem('lm_session', JSON.stringify({
+      userId: user.id, role: user.role, loginAt: new Date().toISOString()
+    }));
+    const { _pass, ...safe } = user;
+    return { success: true, user: safe };
+  }
   const r = await api('POST', '/auth/login', { email, password });
   if (r.error) return { error: r.error };
   setToken(r.token);
-  // store session info in localStorage for quick sync checks
   localStorage.setItem('lm_session', JSON.stringify({
     userId: r.user.id, role: r.user.role, loginAt: new Date().toISOString()
   }));
@@ -76,6 +137,34 @@ async function login(email, password) {
 }
 
 async function register(fullName, email, password, phone) {
+  if (IS_GITHUB_PAGES) {
+    // Mock register
+    const users = getMockUsers();
+    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+      return { error: 'Пользователь с таким email уже существует' };
+    }
+    const newUser = {
+      id: 'u_' + Date.now(),
+      full_name: fullName.trim(),
+      email: email.toLowerCase().trim(),
+      _pass: password, // demo only — plain text
+      phone: phone || null,
+      avatar_url: null,
+      role: 'customer',
+      is_active: true,
+      banned: false,
+      created_at: new Date().toISOString(),
+    };
+    users.push(newUser);
+    saveMockUsers(users);
+    const mockToken = 'mock_token_' + Date.now();
+    setToken(mockToken);
+    localStorage.setItem('lm_session', JSON.stringify({
+      userId: newUser.id, role: newUser.role, loginAt: new Date().toISOString()
+    }));
+    const { _pass, ...safe } = newUser;
+    return { success: true, user: safe };
+  }
   const r = await api('POST', '/auth/register', { full_name: fullName, email, password, phone });
   if (r.error) return { error: r.error };
   setToken(r.token);
@@ -95,43 +184,88 @@ function getSession() {
   return JSON.parse(localStorage.getItem('lm_session') || 'null');
 }
 
-/** Async — validates token with server and returns full user object */
+/** Async — validates token with server (or mock) and returns full user object */
 async function getCurrentUser() {
   const token = getToken();
   if (!token) return null;
+  if (IS_GITHUB_PAGES) {
+    const sess = getSession();
+    if (!sess) return null;
+    const users = getMockUsers();
+    return users.find(u => u.id === sess.userId) || null;
+  }
   const r = await api('GET', '/auth/me');
   if (r.error) { logout(); return null; }
   return r;
 }
 
 // ── ADDRESSES ─────────────────────────────────────────────────
-async function getAddressesByUser(userId) { return api('GET', '/addresses'); }
+async function getAddressesByUser(userId) {
+  if (IS_GITHUB_PAGES) return JSON.parse(localStorage.getItem('lm_addr_' + userId) || '[]');
+  return api('GET', '/addresses');
+}
 async function saveAddress(address) {
+  if (IS_GITHUB_PAGES) {
+    const sess = getSession();
+    if (!sess) return { error: 'Not logged in' };
+    const key = 'lm_addr_' + sess.userId;
+    const addrs = JSON.parse(localStorage.getItem(key) || '[]');
+    if (address.id && !address.id.startsWith('__new')) {
+      const idx = addrs.findIndex(a => a.id === address.id);
+      if (idx !== -1) addrs[idx] = address;
+    } else {
+      const { id, ...rest } = address;
+      addrs.push({ ...rest, id: 'addr_' + Date.now() });
+    }
+    localStorage.setItem(key, JSON.stringify(addrs));
+    return { success: true };
+  }
   if (address.id && !address.id.startsWith('__new')) return api('PUT', '/addresses/' + address.id, address);
   const { id, ...rest } = address;
   return api('POST', '/addresses', rest);
 }
-async function deleteAddress(id)          { return api('DELETE', '/addresses/' + id); }
+async function deleteAddress(id) {
+  if (IS_GITHUB_PAGES) {
+    const sess = getSession();
+    if (!sess) return;
+    const key = 'lm_addr_' + sess.userId;
+    const addrs = JSON.parse(localStorage.getItem(key) || '[]').filter(a => a.id !== id);
+    localStorage.setItem(key, JSON.stringify(addrs));
+    return { success: true };
+  }
+  return api('DELETE', '/addresses/' + id);
+}
 
 // ── ORDERS ────────────────────────────────────────────────────
-async function getOrdersByUser(userId)    { return api('GET', '/orders'); }
+async function getOrdersByUser(userId) {
+  if (IS_GITHUB_PAGES) return JSON.parse(localStorage.getItem('lm_orders_' + userId) || '[]');
+  return api('GET', '/orders');
+}
 async function getAllOrders()             { return api('GET', '/orders/all'); }
 async function updateOrderStatus(orderId, status, track) { return api('PUT', '/orders/' + orderId, { status, track }); }
 async function deleteOrder(orderId)       { return api('DELETE', '/orders/' + orderId); }
 
 // ── WISHLIST ──────────────────────────────────────────────────
 async function getWishlist(userId) {
+  if (IS_GITHUB_PAGES) return JSON.parse(localStorage.getItem('lm_wish_' + userId) || '[]');
   const r = await api('GET', '/stock/wishlist/' + userId);
   return Array.isArray(r) ? r : [];
 }
 async function toggleWishlist(userId, productId) {
+  if (IS_GITHUB_PAGES) {
+    const key = 'lm_wish_' + userId;
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    const idx = list.indexOf(productId);
+    if (idx === -1) list.push(productId);
+    else list.splice(idx, 1);
+    localStorage.setItem(key, JSON.stringify(list));
+    return idx === -1; // true = now in wishlist
+  }
   const r = await api('POST', '/stock/wishlist/' + userId + '/' + productId);
   return r.in_wishlist;
 }
 
 // ── NOTIFICATIONS ─────────────────────────────────────────────
-// Notifications are part of dashboard; fetched from orders/products polling.
-// For now keep a localStorage fallback for notifications.
 function getNotifications()  { return JSON.parse(localStorage.getItem('lm_notif') || '[]'); }
 function markNotifRead(id)   { const n=getNotifications().map(x=>x.id===id?{...x,read:true}:x); localStorage.setItem('lm_notif',JSON.stringify(n)); }
 function addNotification(type, msg) {
@@ -142,8 +276,11 @@ function addNotification(type, msg) {
 
 // ── Auto-init ─────────────────────────────────────────────────
 function initDb() {
-  // Nothing to seed — data lives in the backend SQLite DB.
-  // Just verify server is reachable (non-blocking).
+  if (IS_GITHUB_PAGES) {
+    console.log('%c✦ LUMIÈRE Demo Mode (GitHub Pages)', 'color:#D4907E;font-weight:bold');
+    console.log('%c  Данные хранятся локально в браузере. Для production подключите backend.', 'color:#8C6E60;font-size:11px');
+    return;
+  }
   fetch(API_BASE.replace('/api', '') + '/api/health')
     .then(r => r.json())
     .then(() => console.log('%c✦ LUMIÈRE API connected', 'color:#D4907E;font-weight:bold'))

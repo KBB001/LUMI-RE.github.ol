@@ -407,9 +407,35 @@ button{cursor:pointer;font-family:var(--font-u)}
   .modal-backdrop{align-items:flex-end;padding:0}
   .product-modal{grid-template-columns:1fr;border-radius:24px 24px 0 0;max-height:90vh;overflow-y:auto}
   .modal-img-wrap{min-height:200px}
+  /* Cart sidebar full-width on mobile */
+  .cart-sidebar{width:100vw;right:-100vw}
+  /* Touch-friendly buttons */
+  .nav-icon-btn,.burger,.qty-dec,.qty-inc{min-width:44px;min-height:44px}
+  /* Search bar padding */
+  .search-bar-full{padding:0 20px}
+  /* Toast bottom safe area */
+  .toast-container{bottom:24px;right:16px;left:16px}
+  .toast{min-width:unset;width:100%}
 }
 @media(max-width:480px){
   .products-grid{grid-template-columns:1fr 1fr;gap:10px}
   .pc-img{height:160px}
   .footer-top{grid-template-columns:1fr}
+  /* Hero adjustments for small phones */
+  .hero-title{font-size:clamp(32px,9vw,40px)}
+  .hero-subtitle{font-size:14px}
+  .hero-cta-row{flex-direction:column;align-items:center}
+  .btn-hero-primary,.btn-hero-ghost{width:100%;max-width:280px;justify-content:center}
+  /* Product modal stacked */
+  .modal-body{padding:20px}
+  /* Bottom nav padding for iOS home indicator */
+  .cart-footer{padding-bottom:max(20px, env(safe-area-inset-bottom))}
+  .mobile-nav{padding:24px 20px}
+  .mobile-nav-links a{font-size:24px}
+}
+@media(max-width:360px){
+  .pc-img{height:140px}
+  .pc-name{font-size:12px}
+  .pc-price{font-size:16px}
+  .nav-inner{padding:0 12px}
 }
