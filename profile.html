@@ -471,8 +471,8 @@ const tabTitles = {
 };
 
 // ── Init ────────────────────────────────
-function init(){
-  currentUser = getCurrentUser();
+async function init(){
+  currentUser = await getCurrentUser();
   if(!currentUser){
     document.getElementById('loginWall').style.display = 'flex';
     document.getElementById('appContainer').style.display = 'none';
@@ -480,10 +480,12 @@ function init(){
     document.getElementById('loginWall').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
     loadProfile();
-    renderOrders();
-    renderWishlist();
-    renderAddresses();
-    updateBadges();
+    await Promise.all([
+      renderOrders(),
+      renderWishlist(),
+      renderAddresses(),
+      updateBadges()
+    ]);
   }
 }
 
@@ -565,13 +567,16 @@ function loadProfile(){
 function saveProfile(e){
   e.preventDefault();
   const n = document.getElementById('pName').value.trim();
-  currentUser = updateUser(currentUser.id, {
+  updateUser(currentUser.id, {
     full_name: n, 
     phone: document.getElementById('pPhone').value.trim(), 
     avatar_url: document.getElementById('pAvatar').value.trim()
+  }).then(r => {
+    if(r.error) { toast(r.error, 'alert-circle', 'red-400'); return; }
+    currentUser = r;
+    loadProfile();
+    toast('Изменения успешно сохранены', 'check-circle-2', 'green-400');
   });
-  loadProfile();
-  toast('Изменения успешно сохранены', 'check-circle-2', 'green-400');
 }
 
 function changeAvatar(){
@@ -583,7 +588,16 @@ function removeAvatar(){
   saveProfile(new Event('submit'));
 }
 
-async function updateBadges() {\n  const orders = await getOrdersByUser(currentUser.id);\n  const activeOrders = (orders||[]).filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;\n  const ob = document.getElementById('ordersBadge');\n  if(activeOrders > 0){ ob.textContent = activeOrders; ob.classList.remove('hidden'); } else { ob.classList.add('hidden'); }\n\n  const wish = await getWishlist(currentUser.id);\n  const wb = document.getElementById('wishBadge');\n  if((wish||[]).length > 0){ wb.textContent = wish.length; wb.classList.remove('hidden'); } else { wb.classList.add('hidden'); }\n}
+async function updateBadges() {
+  const orders = await getOrdersByUser(currentUser.id);
+  const activeOrders = (orders||[]).filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+  const ob = document.getElementById('ordersBadge');
+  if(activeOrders > 0){ ob.textContent = activeOrders; ob.classList.remove('hidden'); } else { ob.classList.add('hidden'); }
+
+  const wish = await getWishlist(currentUser.id);
+  const wb = document.getElementById('wishBadge');
+  if((wish||[]).length > 0){ wb.textContent = wish.length; wb.classList.remove('hidden'); } else { wb.classList.add('hidden'); }
+}
 
 
 // ── Orders ────────────────────────────────
@@ -592,12 +606,17 @@ const progressSteps=['Оформлен','Подтверждён','В пути','
 const statusProgress={processing:1,transit:2,in_transit:2,delivered:4,cancelled:0};
 
 function filterOrders(filter){
-  let orders=getOrdersByUser(currentUser.id);
-  if(filter!=='all') orders=orders.filter(o=>o.status===filter||(filter==='transit'&&o.status==='in_transit'));
-  renderOrderList(orders);
+  getOrdersByUser(currentUser.id).then(orders => {
+    if(!Array.isArray(orders)) orders=[];
+    if(filter!=='all') orders=orders.filter(o=>o.status===filter||(filter==='transit'&&o.status==='in_transit'));
+    renderOrderList(orders);
+  });
 }
 
-function renderOrders(){ renderOrderList(getOrdersByUser(currentUser.id)); }
+async function renderOrders(){ 
+  const orders = await getOrdersByUser(currentUser.id);
+  renderOrderList(Array.isArray(orders) ? orders : []); 
+}
 
 function renderOrderList(orders){
   const c = document.getElementById('ordersContainer');
@@ -639,10 +658,11 @@ function downloadReceipt(orderId){
 }
 
 // ── Wishlist ──────────────────────────────
-function renderWishlist(){
-  const ids = getWishlist(currentUser.id);
-  const prods = getProducts();
-  const wl = prods.filter(p => ids.includes(p.id));
+async function renderWishlist(){
+  const [ids, prodsAll] = await Promise.all([getWishlist(currentUser.id), getProducts()]);
+  const prods = Array.isArray(prodsAll) ? prodsAll : [];
+  const wishIds = Array.isArray(ids) ? ids : [];
+  const wl = prods.filter(p => wishIds.includes(p.id));
   const EMOJIS = {skincare:'🧴',makeup:'💄',fragrance:'🌸',body:'✨'};
   
   const c = document.getElementById('wishlistGrid');
@@ -664,7 +684,7 @@ function renderWishlist(){
       <div class="wl-body">
         <div class="text-[10px] uppercase tracking-widest text-stone-500 font-bold mb-1">${p.brand}</div>
         <div class="text-[13px] font-medium leading-tight mb-2 h-8 overflow-hidden text-[#1C1C1E]">${p.name}</div>
-        <div class="font-bold text-[15px]">₸ ${p.price.toLocaleString('ru-KZ')}</div>
+        <div class="font-bold text-[15px]">₸ ${(Number(p.price)||0).toLocaleString('ru-KZ')}</div>
         <button onclick="toast('Товар добавлен в корзину')" class="w-full mt-3 bg-black text-white py-2 rounded-lg text-[12px] font-semibold hover:bg-stone-800 transition">В корзину</button>
       </div>
     </div>
@@ -672,14 +692,18 @@ function renderWishlist(){
   lucide.createIcons();
 }
 
-function removeWish(id,ev){ 
-  ev.stopPropagation(); toggleWishlist(currentUser.id,id); renderWishlist(); updateBadges(); toast('Удалено из избранного'); 
+async function removeWish(id,ev){ 
+  ev.stopPropagation(); 
+  await toggleWishlist(currentUser.id,id); 
+  await Promise.all([renderWishlist(), updateBadges()]); 
+  toast('Удалено из избранного'); 
 }
 
 // ── Addresses ─────────────────────────────
-function renderAddresses(){
+async function renderAddresses(){
   const list = document.getElementById('addrList');
-  const addrs = getAddressesByUser(currentUser.id);
+  const addrsAll = await getAddressesByUser(currentUser.id);
+  const addrs = Array.isArray(addrsAll) ? addrsAll : [];
   if(!addrs.length){ 
     list.innerHTML = '<div class="text-center py-10 bg-stone-50 rounded-2xl border border-stone-100"><i data-lucide="map" class="w-12 h-12 mx-auto text-stone-300 mb-4"></i><h3 class="font-bold text-lg">Нет адресов</h3><p class="text-sm text-stone-500 mt-2">Добавьте адрес для быстрого оформления.</p></div>'; 
     lucide.createIcons();
@@ -704,10 +728,12 @@ function renderAddresses(){
 }
 
 let editAddrId = null;
-function openAddrModal(id){
+async function openAddrModal(id){
   editAddrId = id;
   if(id){
-    const a = getAddressesByUser(currentUser.id).find(x=>x.id===id);
+    const addrs = await getAddressesByUser(currentUser.id);
+    const a = Array.isArray(addrs) ? addrs.find(x=>x.id===id) : null;
+    if(!a) return;
     document.getElementById('addrModalTitle').textContent = 'Редактировать адрес';
     document.getElementById('aId').value = id;
     document.getElementById('aLabel').value = a.label||'';
@@ -727,30 +753,42 @@ function openAddrModal(id){
   document.getElementById('addrModal').classList.add('open');
 }
 function closeAddrModal(){ document.getElementById('addrModal').classList.remove('open'); }
-function saveAddrModal(){
+async function saveAddrModal(){
   const n = document.getElementById('aName').value.trim();
   const c = document.getElementById('aCity').value.trim();
   const s = document.getElementById('aStreet').value.trim();
   if(!n||!c||!s){ toast('Заполните обязательные поля'); return; }
-  saveAddress({id:editAddrId||null, user_id:currentUser.id, label:document.getElementById('aLabel').value.trim()||'Дом', recipient_name:n, recipient_phone:document.getElementById('aPhone').value.trim(), country:'Казахстан', city:c, street:s, apartment:document.getElementById('aApt').value.trim(), postal_code:document.getElementById('aPostal').value.trim(), delivery_notes:document.getElementById('aNotes').value.trim(), is_default:document.getElementById('aDefault').checked});
-  closeAddrModal(); renderAddresses(); toast('Адрес сохранён', 'check', 'green-400');
+  const r = await saveAddress({id:editAddrId||null, user_id:currentUser.id, label:document.getElementById('aLabel').value.trim()||'Дом', recipient_name:n, recipient_phone:document.getElementById('aPhone').value.trim(), country:'Казахстан', city:c, street:s, apartment:document.getElementById('aApt').value.trim(), postal_code:document.getElementById('aPostal').value.trim(), delivery_notes:document.getElementById('aNotes').value.trim(), is_default:document.getElementById('aDefault').checked});
+  if(r&&r.error){ toast(r.error, 'x', 'red-400'); return; }
+  closeAddrModal(); await renderAddresses(); toast('Адрес сохранён', 'check', 'green-400');
 }
-function delAddr(id){ if(confirm('Удалить адрес?')){ deleteAddress(id); renderAddresses(); toast('Адрес удалён'); } }
+async function delAddr(id){ 
+  if(confirm('Удалить адрес?')){ 
+    const r=await deleteAddress(id); 
+    if(r&&r.error){ toast(r.error, 'x', 'red-400'); return; }
+    await renderAddresses(); 
+    toast('Адрес удалён'); 
+  } 
+}
 
 // ── Password ───────────────────────────────
-function changePassword(e){
+async function changePassword(e){
   e.preventDefault();
   const old = document.getElementById('passOld').value;
   const nw = document.getElementById('passNew').value;
   const nw2 = document.getElementById('passNew2').value;
   const err = document.getElementById('passErr');
   
-  if(old !== currentUser.password){ err.textContent='Неверный текущий пароль'; err.classList.remove('hidden'); return; }
+  if(!old){ err.textContent='Введите текущий пароль'; err.classList.remove('hidden'); return; }
   if(nw.length < 6){ err.textContent='Новый пароль: минимум 6 символов'; err.classList.remove('hidden'); return; }
   if(nw !== nw2){ err.textContent='Пароли не совпадают'; err.classList.remove('hidden'); return; }
   
   err.classList.add('hidden');
-  currentUser = updateUser(currentUser.id, {password:nw});
+  
+  const r = await api('PUT', '/auth/password', { oldPass: old, newPass: nw });
+  if(r.error){
+    err.textContent=r.error; err.classList.remove('hidden'); return;
+  }
   
   document.getElementById('passOld').value = '';
   document.getElementById('passNew').value = '';
@@ -760,8 +798,8 @@ function changePassword(e){
 }
 
 // ── Auth ───────────────────────────────────
-function doLogin(){
-  const r = login(document.getElementById('lwEmail').value.trim(), document.getElementById('lwPass').value);
+async function doLogin(){
+  const r = await login(document.getElementById('lwEmail').value.trim(), document.getElementById('lwPass').value);
   if(r.error){ const e=document.getElementById('lwErr'); e.textContent=r.error; e.classList.add('show'); return; }
   currentUser = r.user; 
   init();

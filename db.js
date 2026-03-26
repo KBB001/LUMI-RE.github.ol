@@ -10,7 +10,13 @@
 'use strict';
 
 // ── Config ────────────────────────────────────────────────────
+// 1. Для работы на вашем ПК (локально):
 const API_BASE = 'http://localhost:3000/api';
+
+// 2. Для интернета (когда загрузите сервер на Render.com):
+// Закомментируйте строку выше (поставьте //) и раскомментируйте строку ниже,
+// вставив туда вашу ссылку от Render:
+// const API_BASE = 'https://lumiere-api-XXXX.onrender.com/api';
 
 // ── Token storage ─────────────────────────────────────────────
 function getToken()          { return localStorage.getItem('lm_jwt'); }

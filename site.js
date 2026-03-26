@@ -373,9 +373,9 @@ function submitNewsletter(e){
   e.preventDefault();
   const form = document.getElementById('nlForm');
   if(form) {
-    form.innerHTML = \`<p style="color:var(--blush);font-family:var(--font-s);font-size:22px;text-align:center">
+    form.innerHTML = `<p style="color:var(--blush);font-family:var(--font-s);font-size:22px;text-align:center">
       ✓ Вы подписаны!<br/><span style="font-size:14px;color:rgba(248,242,234,.5);font-family:var(--font-u)">Спасибо, следите за новинками</span>
-    </p>\`;
+    </p>`;
   }
 }
 window.submitNewsletter = submitNewsletter;
@@ -383,13 +383,13 @@ window.submitNewsletter = submitNewsletter;
 // ─── Kaspi / Halyk checkout ───────────
 function checkoutKaspi(){
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
-  if(!total){ toast('Корзина пуста','🛍'); return; }
-  toast(`Переход на Kaspi.kz · ${fmt(total)}`,'💳');
+  if(!total){ toast('Корзина пуста'); return; }
+  toast(`Переход на Kaspi.kz · ${fmt(total)}`);
 }
 function checkoutHalyk(){
   const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
-  if(!total){ toast('Корзина пуста','🛍'); return; }
-  toast(`Переход на Halyk Pay · ${fmt(total)}`,'🏦');
+  if(!total){ toast('Корзина пуста'); return; }
+  toast(`Переход на Halyk Pay · ${fmt(total)}`);
 }
 window.checkoutKaspi = checkoutKaspi;
 window.checkoutHalyk = checkoutHalyk;
