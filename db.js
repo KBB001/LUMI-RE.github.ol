@@ -84,19 +84,9 @@ const MOCK_ADDRESSES_SEED = {
   u2: [{ id:'a1', user_id:'u2', label:'Дом', recipient_name:'Айна Бекова', recipient_phone:'+77012345678', country:'Казахстан', city:'Алматы', street:'ул. Абая, 10', apartment:'кв. 25', postal_code:'050000', delivery_notes:'', is_default:true, created_at:'2024-02-15T10:30:00Z' }]
 };
 
-// Mock пользователи — авто-инициализация при первом запуске
-const MOCK_DB_VERSION = 'v2'; // Поменяйте при обновлении данных
+// Mock пользователи — читаем из localStorage, seed делается в initDb()
+const MOCK_DB_VERSION = 'v3';
 function getMockUsers() {
-  if (localStorage.getItem('lm_mock_seeded') !== MOCK_DB_VERSION) {
-    // Новая версия данных — перезаписываем
-    localStorage.setItem('lm_mock_users', JSON.stringify(MOCK_USERS_SEED));
-    Object.entries(MOCK_ORDERS_SEED).forEach(([uid, orders]) =>
-      localStorage.setItem('lm_orders_' + uid, JSON.stringify(orders)));
-    Object.entries(MOCK_ADDRESSES_SEED).forEach(([uid, addrs]) =>
-      localStorage.setItem('lm_addr_' + uid, JSON.stringify(addrs)));
-    localStorage.setItem('lm_mock_seeded', MOCK_DB_VERSION);
-    console.log('%c✔ LUMIÈRE demo data seeded', 'color:#D4907E');
-  }
   return JSON.parse(localStorage.getItem('lm_mock_users') || JSON.stringify(MOCK_USERS_SEED));
 }
 function saveMockUsers(users) {
@@ -307,9 +297,33 @@ function addNotification(type, msg) {
   localStorage.setItem('lm_notif',JSON.stringify(n.slice(0,50)));
 }
 
-// ── Auto-init ─────────────────────────────────────────────────
+// ── Auto-init ────────────────────────────────────────────────────────────
 function initDb() {
   if (IS_GITHUB_PAGES) {
+    // Запускаем seed сразу при загрузке страницы
+    if (localStorage.getItem('lm_mock_seeded') !== MOCK_DB_VERSION) {
+      // Оставляем аккаунты пользователей (чтобы не стереть созданные аккаунты)
+      const existingUsers = JSON.parse(localStorage.getItem('lm_mock_users') || '[]');
+      // Добавляем seed-аккаунты если их ещё нет
+      const merged = [...existingUsers];
+      MOCK_USERS_SEED.forEach(seedUser => {
+        if (!merged.find(u => u.id === seedUser.id)) {
+          merged.push(seedUser);
+        }
+      });
+      localStorage.setItem('lm_mock_users', JSON.stringify(merged));
+      // Седаем заказы и адреса для демо-пользователей
+      Object.entries(MOCK_ORDERS_SEED).forEach(([uid, orders]) => {
+        if (!localStorage.getItem('lm_orders_' + uid))
+          localStorage.setItem('lm_orders_' + uid, JSON.stringify(orders));
+      });
+      Object.entries(MOCK_ADDRESSES_SEED).forEach(([uid, addrs]) => {
+        if (!localStorage.getItem('lm_addr_' + uid))
+          localStorage.setItem('lm_addr_' + uid, JSON.stringify(addrs));
+      });
+      localStorage.setItem('lm_mock_seeded', MOCK_DB_VERSION);
+      console.log('%c✔ LUMIÈRE demo data ready (v3)', 'color:#D4907E;font-weight:bold');
+    }
     console.log('%c✦ LUMIÈRE Demo Mode (GitHub Pages)', 'color:#D4907E;font-weight:bold');
     console.log('%c  Данные хранятся локально в браузере. Для production подключите backend.', 'color:#8C6E60;font-size:11px');
     return;
