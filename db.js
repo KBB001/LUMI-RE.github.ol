@@ -62,9 +62,42 @@ const MOCK_PRODUCTS = [
   { id:'p12', brand:'NARS', name:'Blush — Orgasm', cat:'makeup', price:25000, oldPrice:null, badge:'hit', stars:'★★★★★', reviews:4512, art:'pa-blush', desc:'Самые популярные румяна в мире. Золотистый персиковый оттенок подходит для любого тона кожи.' },
 ];
 
-// Mock "пользователи" для демо-режима (хранятся в localStorage)
+// Демо-пользователи (авто-загружаются при первом запуске)
+const MOCK_USERS_SEED = [
+  { id:'u1', full_name:'Admin LUMIÈRE', email:'admin@lumiere.kz', _pass:'admin123',    phone:'+77771234567', avatar_url:null, role:'admin',    is_active:true, banned:false, created_at:'2024-01-01T00:00:00Z' },
+  { id:'u2', full_name:'Айна Бекова',  email:'aina@example.kz',  _pass:'customer123', phone:'+77012345678', avatar_url:null, role:'customer', is_active:true, banned:false, created_at:'2024-02-15T10:30:00Z' },
+];
+
+const MOCK_ORDERS_SEED = {
+  u2: [
+    { id:'ord-001', user_id:'u2', date:'2026-03-01T10:15:00Z', total:122900, status:'delivered',  track:'KZ123456789', address:'г. Алматы, ул. Абая, 10, кв. 25', items:[{name:'Moisturizing Soft Cream',qty:1,price:98000},{name:'Matte Lipstick',qty:2,price:12900}] },
+    { id:'ord-002', user_id:'u2', date:'2026-03-07T14:30:00Z', total:76000,  status:'in_transit', track:'KZ987654321', address:'г. Алматы, ул. Абая, 10, кв. 25', items:[{name:'Peony & Blush Suede',qty:1,price:76000}] },
+    { id:'ord-004', user_id:'u2', date:'2026-03-09T16:45:00Z', total:24900,  status:'processing', track:'',            address:'г. Алматы, ул. Абая, 10, кв. 25', items:[{name:'Radiant Creamy Concealer',qty:1,price:24900}] },
+  ],
+  u1: [
+    { id:'ord-003', user_id:'u1', date:'2026-03-08T09:00:00Z', total:58000, status:'processing', track:'', address:'г. Астана, пр. Республики, 1', items:[{name:'Magic Cream',qty:1,price:58000}] },
+    { id:'ord-005', user_id:'u1', date:'2026-03-09T20:10:00Z', total:94000, status:'processing', track:'', address:'г. Астана, пр. Республики, 1', items:[{name:'Sauvage Elixir',qty:1,price:94000}] },
+  ]
+};
+
+const MOCK_ADDRESSES_SEED = {
+  u2: [{ id:'a1', user_id:'u2', label:'Дом', recipient_name:'Айна Бекова', recipient_phone:'+77012345678', country:'Казахстан', city:'Алматы', street:'ул. Абая, 10', apartment:'кв. 25', postal_code:'050000', delivery_notes:'', is_default:true, created_at:'2024-02-15T10:30:00Z' }]
+};
+
+// Mock пользователи — авто-инициализация при первом запуске
+const MOCK_DB_VERSION = 'v2'; // Поменяйте при обновлении данных
 function getMockUsers() {
-  return JSON.parse(localStorage.getItem('lm_mock_users') || '[]');
+  if (localStorage.getItem('lm_mock_seeded') !== MOCK_DB_VERSION) {
+    // Новая версия данных — перезаписываем
+    localStorage.setItem('lm_mock_users', JSON.stringify(MOCK_USERS_SEED));
+    Object.entries(MOCK_ORDERS_SEED).forEach(([uid, orders]) =>
+      localStorage.setItem('lm_orders_' + uid, JSON.stringify(orders)));
+    Object.entries(MOCK_ADDRESSES_SEED).forEach(([uid, addrs]) =>
+      localStorage.setItem('lm_addr_' + uid, JSON.stringify(addrs)));
+    localStorage.setItem('lm_mock_seeded', MOCK_DB_VERSION);
+    console.log('%c✔ LUMIÈRE demo data seeded', 'color:#D4907E');
+  }
+  return JSON.parse(localStorage.getItem('lm_mock_users') || JSON.stringify(MOCK_USERS_SEED));
 }
 function saveMockUsers(users) {
   localStorage.setItem('lm_mock_users', JSON.stringify(users));
