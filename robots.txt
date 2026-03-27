@@ -1,0 +1,12 @@
+# ══════════════════════════════════════
+# LUMIÈRE — robots.txt
+# ══════════════════════════════════════
+
+User-agent: *
+Allow: /
+
+# Запретить индексацию административной панели
+Disallow: /admin.html
+
+# Карта сайта
+Sitemap: https://kbb001.github.io/LUMI-RE/sitemap.xml

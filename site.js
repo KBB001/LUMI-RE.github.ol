@@ -311,10 +311,17 @@ document.getElementById('loadMoreBtn').addEventListener('click', () => {
   renderProducts();
 });
 
-// ─── Navbar ──────────────────────────
+// ─── Navbar (rAF-throttled) ──────────
 const navbar = document.getElementById('navbar');
+let scrollTicking = false;
 window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 40);
+  if (!scrollTicking) {
+    requestAnimationFrame(() => {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
 }, { passive: true });
 
 // Search
@@ -414,23 +421,40 @@ revealEls.forEach(el => {
 });
 document.head.insertAdjacentHTML('beforeend', '<style>.revealed{opacity:1!important;transform:none!important}</style>');
 
-// ─── Parallax hero ────────────────────
+// ─── Parallax hero (rAF-throttled) ───
 const heroVis = document.getElementById('heroVisual');
+let parallaxTicking = false;
 window.addEventListener('scroll', () => {
-  if(heroVis && window.scrollY < window.innerHeight){
-    heroVis.style.transform = `translateY(${window.scrollY * 0.12}px)`;
+  if (!parallaxTicking) {
+    requestAnimationFrame(() => {
+      if(heroVis && window.scrollY < window.innerHeight){
+        heroVis.style.transform = `translateY(${window.scrollY * 0.12}px)`;
+      }
+      parallaxTicking = false;
+    });
+    parallaxTicking = true;
   }
 }, { passive: true });
 
 // ─── Init ─────────────────────────────
 async function initApp() {
-  await initAuthUI();
-  await syncProductDb();
-  addFeatured();
-  await renderProducts();
-  updateCartUI();
+  try {
+    await initAuthUI();
+    await syncProductDb();
+    addFeatured();
+    await renderProducts();
+    updateCartUI();
+  } catch(e) {
+    console.error('[LUMIÈRE] Init error:', e);
+  }
 }
-initApp();
+
+// Safe init: wait for DOM if using defer scripts
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 console.log('%c✦ LUMIÈRE', 'font-family:serif;font-size:24px;color:#D4907E');
 console.log('%cLuxury Beauty · Kazakhstan · ₸ KZT', 'font-size:12px;color:#8C6E60');

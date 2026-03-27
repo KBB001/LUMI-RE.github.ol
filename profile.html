@@ -788,7 +788,7 @@ async function changePassword(e){
   err.classList.add('hidden');
   
   // In GitHub Pages demo mode - simple password update
-  if (window.IS_GITHUB_PAGES || location.hostname.includes('github.io') || location.hostname.includes('github.ol')) {
+  if (window.IS_GITHUB_PAGES || location.hostname.includes('github.io')) {
     const users = JSON.parse(localStorage.getItem('lm_mock_users') || '[]');
     const idx = users.findIndex(u => u.id === currentUser.id);
     if (idx === -1) { err.textContent='Пользователь не найден'; err.classList.remove('hidden'); return; }

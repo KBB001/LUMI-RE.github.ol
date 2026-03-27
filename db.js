@@ -16,7 +16,7 @@
 // const API_BASE = 'https://lumiere-api-XXXX.onrender.com/api';
 
 // Автоматический выбор: localhost локально, пустую строку — на GitHub Pages
-const IS_GITHUB_PAGES = location.hostname.includes('github.io') || location.hostname.includes('github.ol');
+const IS_GITHUB_PAGES = location.hostname.includes('github.io');
 const API_BASE = IS_GITHUB_PAGES ? '' : 'http://localhost:3000/api';
 
 // ── Token storage ─────────────────────────────────────────────

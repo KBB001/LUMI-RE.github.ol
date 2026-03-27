@@ -439,3 +439,196 @@ button{cursor:pointer;font-family:var(--font-u)}
   .pc-price{font-size:16px}
   .nav-inner{padding:0 12px}
 }
+
+/* ══════════════════════════════════════
+   ACCESSIBILITY: Reduced Motion
+   ══════════════════════════════════════ */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:0.01ms!important;
+    scroll-behavior:auto!important;
+  }
+  .hba-blob,.hpa-bottle,.petal,.hero-scroll-hint,.ticker-track{animation:none!important}
+}
+
+/* ══════════════════════════════════════
+   FOCUS-VISIBLE (Keyboard Accessibility)
+   ══════════════════════════════════════ */
+:focus-visible{
+  outline:2px solid var(--rose);
+  outline-offset:3px;
+  border-radius:4px;
+}
+button:focus-visible,a:focus-visible,.nav-icon-btn:focus-visible,.ftab:focus-visible{
+  outline:2px solid var(--rose);
+  outline-offset:3px;
+}
+/* Remove default outline for mouse users */
+:focus:not(:focus-visible){outline:none}
+
+/* ══════════════════════════════════════
+   SCROLL-SNAP: Testimonials
+   ══════════════════════════════════════ */
+.testimonials-track{
+  scroll-snap-type:x mandatory;
+  scroll-padding:0 60px;
+}
+.testi-card{
+  scroll-snap-align:start;
+}
+
+/* ══════════════════════════════════════
+   GLOW EFFECTS (Brand "Light" theme)
+   ══════════════════════════════════════ */
+.nav-logo{
+  text-shadow:0 0 40px rgba(212,144,126,.15);
+}
+.hero-title em{
+  text-shadow:0 0 60px rgba(212,144,126,.25);
+}
+.featured-card:hover{
+  box-shadow:0 24px 64px rgba(30,15,5,.18),0 0 80px rgba(212,144,126,.1);
+}
+.btn-hero-primary:hover{
+  box-shadow:0 8px 30px rgba(30,15,5,.3),0 0 40px rgba(212,144,126,.15);
+}
+.footer-logo{
+  text-shadow:0 0 40px rgba(212,144,126,.2);
+}
+
+/* ══════════════════════════════════════
+   DARK THEME (prefers-color-scheme)
+   ══════════════════════════════════════ */
+@media(prefers-color-scheme:dark){
+  :root{
+    --cream:#1A1410;
+    --beige:#241C14;
+    --beige-dk:#5C4033;
+    --blush:#E8C4B8;
+    --rose:#D4907E;
+    --dusty:#C8A09A;
+    --warm-pink:#2E2018;
+    --near-black:#F8F2EA;
+    --dark-brown:#EDE4D5;
+    --mid:#C9B89A;
+    --muted:#A89080;
+    --white:#1E1812;
+    --shadow:0 8px 40px rgba(0,0,0,.35);
+    --shadow-lg:0 24px 64px rgba(0,0,0,.45);
+  }
+  body{background:#1A1410;color:#F8F2EA}
+  img{filter:brightness(.92)}
+
+  /* Navbar */
+  .navbar.scrolled{background:rgba(26,20,16,.92);backdrop-filter:blur(20px)}
+  .nav-links a{color:#F8F2EA}
+  .nav-icon-btn{color:#F8F2EA}
+  .nav-icon-btn:hover{background:rgba(248,242,234,.08)}
+  .burger span{background:#F8F2EA}
+  .search-bar-full{background:#1A1410;border-color:#2E2018}
+  .search-bar-full input{color:#F8F2EA}
+  .nav-logo{color:#F8F2EA}
+
+  /* Hero */
+  .hero{background:linear-gradient(130deg,#1A1410 0%,#241C14 60%,#2E2018 100%)}
+  .hero-title{color:#F8F2EA}
+  .hero-subtitle{color:#A89080}
+  .hero-eyebrow{color:#A89080}
+
+  /* Featured */
+  .featured-section{background:#241C14}
+  .fc-light{background:#2E2018}
+  .fc-light .fc-name{color:#F8F2EA}
+  .fc-light .fc-desc{color:#A89080}
+  .fc-light .fc-price{color:#F8F2EA}
+  .fc-rose{background:#2E2018}
+  .fc-rose .fc-name{color:#F8F2EA}
+  .fc-rose .fc-desc{color:#A89080}
+
+  /* Product Cards */
+  .product-card{background:#241C14;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+  .product-card:hover{box-shadow:0 8px 40px rgba(0,0,0,.4)}
+  .pc-name{color:#F8F2EA}
+  .pc-price{color:#F8F2EA}
+  .pc-add{background:#F8F2EA;color:#1A1410}
+  .pc-add:hover{background:#EDE4D5}
+  .pc-wishlist{background:rgba(30,20,16,.8);color:#A89080}
+
+  /* Filter tabs */
+  .active-ftab{background:#F8F2EA;color:#1A1410;border-color:#F8F2EA}
+  .ftab{border-color:#5C4033;color:#A89080}
+  .ftab:hover{border-color:#F8F2EA;color:#F8F2EA}
+
+  /* Brands */
+  .brands-strip{background:#241C14;border-color:rgba(248,242,234,.08)}
+  .brand-logo-item{color:#A89080;border-color:#5C4033}
+  .brand-logo-item:hover{color:#F8F2EA;border-color:#F8F2EA;background:#2E2018}
+
+  /* Story */
+  .story-section{background:linear-gradient(135deg,#1A1410 0%,#241C14 100%)}
+  .story-title{color:#F8F2EA}
+  .story-body{color:#A89080}
+  .stat-num{color:#F8F2EA}
+  .sa-img-frame{background:rgba(40,30,20,.6);border-color:rgba(248,242,234,.08)}
+
+  /* Testimonials */
+  .testimonials-section{background:#241C14}
+  .testi-card{background:#2E2018}
+  .testi-text{color:#A89080}
+  .testi-name{color:#F8F2EA}
+  .testi-arrow{border-color:#5C4033;color:#F8F2EA}
+  .testi-arrow:hover{background:#F8F2EA;color:#1A1410}
+
+  /* Payment */
+  .payment-section{background:#1A1410;border-color:rgba(248,242,234,.06)}
+  .pay-mc{background:#2E2018;border-color:#5C4033;color:#F8F2EA}
+  .pay-secure{background:#241C14;color:#F8F2EA;border-color:#5C4033}
+
+  /* Newsletter */
+  .newsletter-section{background:linear-gradient(135deg,#F8F2EA 0%,#EDE4D5 100%)}
+  .nl-title{color:#1A1410}
+  .nl-sub{color:rgba(26,20,16,.6)}
+  .nl-input-row{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
+  .nl-input{color:#1A1410}
+  .nl-input::placeholder{color:rgba(26,20,16,.35)}
+  .nl-terms{color:rgba(26,20,16,.3)}
+
+  /* Footer */
+  .site-footer{background:#0E0A06}
+  .footer-top{border-color:rgba(248,242,234,.05)}
+
+  /* Modal */
+  .product-modal{background:#241C14}
+  .modal-img-wrap{background:#1A1410}
+  .modal-name{color:#F8F2EA}
+  .modal-price{color:#F8F2EA}
+  .modal-desc{color:#A89080}
+  .qty-stepper{background:#2E2018}
+  .qty-dec,.qty-inc{color:#F8F2EA}
+  .btn-add-modal{background:#F8F2EA;color:#1A1410}
+
+  /* Cart */
+  .cart-sidebar{background:#1A1410}
+  .cart-header{border-color:#2E2018}
+  .cart-title{color:#F8F2EA}
+  .cart-empty p{color:#F8F2EA}
+  .cart-subtotal strong{color:#F8F2EA}
+  .cart-footer{border-color:#2E2018}
+  .btn-outline-dark{color:#F8F2EA;border-color:#F8F2EA}
+  .btn-outline-dark:hover{background:#F8F2EA;color:#1A1410}
+
+  /* Toast */
+  .toast{background:#F8F2EA;color:#1A1410}
+
+  /* Ticker */
+  .ticker-wrap{background:#F8F2EA}
+  .ticker-item{color:#1A1410}
+
+  /* Glow effects enhanced in dark mode */
+  .nav-logo{text-shadow:0 0 50px rgba(212,144,126,.3)}
+  .hero-title em{text-shadow:0 0 80px rgba(212,144,126,.4)}
+  .footer-logo{text-shadow:0 0 60px rgba(212,144,126,.35)}
+  .featured-card:hover{box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 100px rgba(212,144,126,.15)}
+}

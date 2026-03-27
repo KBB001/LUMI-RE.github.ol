@@ -3,14 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="LUMIÈRE — Luxury beauty e-commerce. Premium skincare, makeup and fragrances. Delivery across Kazakhstan. Pay with Kaspi.kz · Halyk Pay." />
+  <meta name="description" content="LUMIÈRE — люксовая косметика и уход за кожей с доставкой по Казахстану. Chanel, La Mer, NARS, Lancôme. Оплата через Kaspi.kz · Halyk Pay." />
+  <meta name="keywords" content="люксовая косметика, Казахстан, Алматы, Астана, Chanel, La Mer, NARS, Lancôme, Dior, уход за кожей, макияж, парфюмерия" />
+  <meta name="author" content="LUMIÈRE Kazakhstan" />
+  <meta name="robots" content="index, follow" />
   <title>LUMIÈRE — Luxury Beauty Kazakhstan</title>
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://kbb001.github.io/LUMI-RE/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="LUMIÈRE — Luxury Beauty Kazakhstan" />
+  <meta property="og:description" content="Люксовая косметика и уход за кожей. Chanel, La Mer, NARS и 200+ брендов. Доставка по Казахстану." />
+  <meta property="og:url" content="https://kbb001.github.io/LUMI-RE/" />
+  <meta property="og:site_name" content="LUMIÈRE" />
+  <meta property="og:locale" content="ru_KZ" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="LUMIÈRE — Luxury Beauty Kazakhstan" />
+  <meta name="twitter:description" content="Люксовая косметика с доставкой по Казахстану. Оплата через Kaspi.kz." />
+
+  <!-- Theme & PWA -->
+  <meta name="theme-color" content="#1A1410" />
+  <meta name="msapplication-TileColor" content="#1A1410" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' http://localhost:3000" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="site.css" />
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "LUMIÈRE",
+    "alternateName": "LUMIÈRE Kazakhstan",
+    "url": "https://kbb001.github.io/LUMI-RE/",
+    "description": "Люксовая косметика и уход за кожей с доставкой по Казахстану",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "ул. Абая 10",
+      "addressLocality": "Алматы",
+      "addressCountry": "KZ"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+7-777-123-45-67",
+      "contactType": "customer service",
+      "availableLanguage": ["Russian", "Kazakh"]
+    },
+    "sameAs": []
+  }
+  </script>
 </head>
 <body>
+
+  <!-- Noscript fallback -->
+  <noscript>
+    <div style="text-align:center;padding:60px 20px;font-family:sans-serif;background:#F8F2EA;min-height:100vh">
+      <h1 style="font-size:28px;margin-bottom:16px">LUMIÈRE</h1>
+      <p>Для корректной работы сайта необходимо включить JavaScript в настройках браузера.</p>
+    </div>
+  </noscript>
+
 
   <!-- ═══════════════════════════════════
        OVERLAY & CART SIDEBAR
@@ -178,7 +241,7 @@
       </div>
     </div>
     <div class="hero-content">
-      <div class="hero-eyebrow">Новая коллекция · Весна 2024</div>
+      <div class="hero-eyebrow">Новая коллекция · Весна 2026</div>
       <h1 class="hero-title">
         Красота<br/><em>без компромиссов</em>
       </h1>
@@ -479,7 +542,7 @@
   <!-- ═══════════════════════════════════
        FOOTER
   ════════════════════════════════════ -->
-  <footer class="site-footer" id="contact">
+  <footer class="site-footer" id="contact" role="contentinfo">
     <div class="footer-top">
       <div class="footer-brand-col">
         <div class="footer-logo">LUMIÈRE</div>
@@ -536,12 +599,12 @@
     </div>
 
     <div class="footer-bottom">
-      <p class="footer-copy">© 2024 LUMIÈRE Kazakhstan. Все права защищены.</p>
+      <p class="footer-copy">© 2026 LUMIÈRE Kazakhstan. Все права защищены.</p>
       <p class="footer-reg">ТОО «Люмьер Казахстан» · БИН 123456789012 · Алматы, Казахстан</p>
     </div>
   </footer>
 
-  <script src="db.js"></script>
-  <script src="site.js"></script>
+  <script src="db.js" defer></script>
+  <script src="site.js" defer></script>
 </body>
 </html>
