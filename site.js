@@ -403,7 +403,7 @@ window.checkoutKaspi = checkoutKaspi;
 window.checkoutHalyk = checkoutHalyk;
 window.openQuickView = openQuickView;
 
-// ─── Scroll animations ────────────────
+// ─── Scroll animations (staggered reveal) ───
 const revealEls = document.querySelectorAll('.featured-card, .product-card, .testi-card, .stat-item, .brand-logo-item, .pay-badge');
 const ro = new IntersectionObserver((entries) => {
   entries.forEach(en => {
@@ -413,13 +413,50 @@ const ro = new IntersectionObserver((entries) => {
     }
   });
 }, { threshold: 0.1 });
+
+// Staggered entrance effect
+let staggerIndex = 0;
 revealEls.forEach(el => {
   el.style.opacity='0';
-  el.style.transform='translateY(20px)';
-  el.style.transition='opacity .5s ease, transform .5s cubic-bezier(.34,1.56,.64,1)';
+  el.style.transform='translateY(24px)';
+  // Calculate stagger delay based on siblings
+  const siblings = el.parentElement ? [...el.parentElement.children].filter(c => revealEls[Symbol.iterator] ? Array.from(revealEls).includes(c) : false) : [];
+  const idx = siblings.indexOf(el);
+  const delay = idx >= 0 ? idx * 0.08 : 0;
+  el.style.transition=`opacity .6s cubic-bezier(.25,.8,.25,1) ${delay}s, transform .6s cubic-bezier(.34,1.56,.64,1) ${delay}s`;
   ro.observe(el);
 });
 document.head.insertAdjacentHTML('beforeend', '<style>.revealed{opacity:1!important;transform:none!important}</style>');
+
+// ─── Animated Counters ───
+const counters = document.querySelectorAll('.stat-counter');
+if (counters.length > 0) {
+  const counterObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseFloat(el.getAttribute('data-target'));
+        const isFloat = el.getAttribute('data-decimals') === '1';
+        const suffix = el.getAttribute('data-suffix') || '';
+        let start = 0;
+        const duration = 2000;
+        const step = target / (duration / 16);
+        function update() {
+          start += step;
+          if (start < target) {
+            el.textContent = (isFloat ? (Math.round(start * 10)/10).toFixed(1) : Math.floor(start).toLocaleString('ru-RU')) + suffix;
+            requestAnimationFrame(update);
+          } else {
+            el.textContent = (isFloat ? target.toFixed(1) : target.toLocaleString('ru-RU')) + suffix;
+          }
+        }
+        update();
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => counterObserver.observe(c));
+}
 
 // ─── Parallax hero (rAF-throttled) ───
 const heroVis = document.getElementById('heroVisual');

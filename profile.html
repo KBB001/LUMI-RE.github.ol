@@ -4,483 +4,524 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Мой профиль — LUMIÈRE</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- Иконки Lucide -->
+<meta name="description" content="Личный кабинет LUMIÈRE — управление красотой, заказами и ритуалами ухода."/>
+<meta name="theme-color" content="#1B1B1B"/>
+<link rel="canonical" href="https://kbb001.github.io/LUMI-RE/profile.html"/>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Urbanist:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
-<!-- jsPDF для квитанций -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<style>
-/* Сохраняем некоторые старые стили для логин-экрана, корзины, и Toast Alert */
-:root {
-  --bg-color: #F5F3F0;
-  --card-color: #FFFFFF;
-  --text-main: #1C1C1E;
-  --text-muted: #8E8E93;
-  --border-color: #E5E5EA;
-  --rose: #d4907e;
-  --near-black: #2a1a10;
-  --cream: #faf2ea;
-  --beige: #f5eee6;
-  --beige-dk: #e6dfd8;
-}
-body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; min-height: 100vh; }
-.serif { font-family: 'Cormorant Garamond', serif; }
-
-/* Toast */
-.tk { background: #000; color: #fff; padding: 12px 20px; border-radius: 9999px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideIn 0.3s ease forwards; margin-bottom: 10px; }
-.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; }
-@media (min-width: 768px) { .toast-container { bottom: unset; top: 40px; } }
-@keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-/* Login wall из оригинального дизайна */
-.lw { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; text-align: center; }
-.lw h2 { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
-.lw p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
-.lw-box { background: var(--card-color); border-radius: 20px; padding: 32px; width: min(400px, 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-.lw-err { background: rgba(200,50,50,.1); color: #c04040; border-radius: 10px; padding: 10px; font-size: 13px; margin-bottom: 15px; display: none; }
-.lw-err.show { display: block; }
-.inp { background: var(--bg-color); border: 1.5px solid transparent; border-radius: 12px; padding: 12px 14px; font-size: 14px; color: var(--text-main); outline: none; width: 100%; transition: .2s; margin-bottom: 15px; }
-.inp:focus { border-color: #000; background: #fff; }
-.btn-b { background: #000; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: all .2s; margin-bottom: 10px; display: block; text-align: center; }
-.btn-b:hover { background: #333; }
-.btn-o { background: none; border: 1.5px solid var(--border-color); border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; color: var(--text-main); transition: all .2s; text-decoration: none; display: block; text-align: center; }
-.btn-o:hover { border-color: #000; }
-.app-container { display: none; } /* Скрыто пока не залогинен */
-
-/* Состояния вкладок */
-.view-mobile-menu #sidebar { display: block; }
-.view-mobile-menu #content { display: none; }
-.view-mobile-menu #mobile-bottom-nav { transform: translateY(0); }
-
-.view-mobile-content #sidebar { display: none; }
-.view-mobile-content #content { display: block; }
-.view-mobile-content #mobile-bottom-nav { transform: translateY(100%); }
-
-@media (min-width: 768px) {
-  .view-mobile-menu #sidebar, .view-mobile-content #sidebar { display: block; }
-  .view-mobile-menu #content, .view-mobile-content #content { display: block; }
-}
-
-.tab-pane { display: none; }
-.tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Стили заказов */
-.order-card{background:var(--bg-color);border-radius:14px;padding:16px 20px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
-.order-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.status{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;text-transform:uppercase}
-.s-processing{background:#fff3e0;color:#c06010}
-.s-transit{background:#e3f0ff;color:#1060a0}
-.s-delivered{background:#e0f0e8;color:#2a7040}
-.order-progress{display:flex;align-items:center;margin:8px 0}
-.op-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
-.op-step:not(:last-child)::after{content:'';position:absolute;top:10px;left:50%;width:100%;height:2px;background:#e5e5ea;z-index:0}
-.op-step.done::after{background:#000}
-.op-dot{width:20px;height:20px;border-radius:50%;border:2px solid #e5e5ea;background:#fff;z-index:1;position:relative;font-size:10px;display:flex;align-items:center;justify-content:center;color:transparent}
-.op-step.done .op-dot{background:#000;border-color:#000;color:#fff}
-.op-step.active .op-dot{background:#000;border-color:#000;color:#fff}
-.op-lbl{font-size:10px;color:var(--text-muted);margin-top:6px;text-align:center}
-
-/* Стили Избранного */
-.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
-.wl-card{background:var(--bg-color);border-radius:16px;overflow:hidden;position:relative}
-.wl-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,#f8ece9,#f5eee6)}
-.wl-remove{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#000;cursor:pointer}
-.wl-body{padding:12px}
-
-/* Модалки */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
-.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-.modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 20px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-</style>
+<!-- Design System -->
+<link rel="stylesheet" href="profile.css"/>
 </head>
-<body>
 
-<div id="toastContainer" class="toast-container"></div>
+<body class="profile-body">
 
-<!-- ═══ LOGIN WALL ═══════════════════════════ -->
-<div class="lw" id="loginWall">
-  <h2>Войдите в аккаунт</h2>
-  <p>Чтобы управлять профилем и покупками</p>
-  <div class="lw-box text-left">
-    <div class="lw-err" id="lwErr"></div>
-    <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1.5 ml-1">Email</label>
-    <input type="email" class="inp" id="lwEmail" placeholder="ваш@email.com"/>
-    <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1.5 ml-1">Пароль</label>
-    <input type="password" class="inp" id="lwPass" placeholder="••••••••"/>
-    
-    <button class="btn-b mt-4" onclick="doLogin()">Войти</button>
-    <a href="register.html" class="btn-o">Создать аккаунт</a>
-    
-    <div class="mt-4 text-[11px] text-stone-400 text-center leading-relaxed bg-stone-50 rounded-xl p-3">
-      <div class="font-semibold text-stone-500 mb-1">Демо-аккаунты:</div>
-      <div>Админ: <strong class="text-stone-600">admin@lumiere.kz</strong> / <strong class="text-stone-600">admin123</strong></div>
-      <div>Клиент: <strong class="text-stone-600">aina@example.kz</strong> / <strong class="text-stone-600">customer123</strong></div>
+<!-- ══════════════════════════════════════
+     TOAST CONTAINER
+     ══════════════════════════════════════ -->
+<div class="toast-stack" id="toastStack" style="bottom:90px;left:50%;transform:translateX(-50%)"></div>
+
+<!-- ══════════════════════════════════════
+     LOGIN WALL — "Digital Sanctuary Gate"
+     ══════════════════════════════════════ -->
+<section class="lw-sanctuary" id="loginWall" aria-label="Авторизация">
+
+  <!-- Aurora background orbs -->
+  <div class="lw-aurora">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="lw-card">
+    <div class="lw-brand">LUMIÈRE</div>
+    <h1 class="lw-title">Добро пожаловать</h1>
+    <p class="lw-subtitle">Войдите, чтобы продолжить свой путь к сиянию</p>
+
+    <div class="lw-error" id="lwErr"></div>
+
+    <div class="lm-field">
+      <label class="lm-label" for="lwEmail">Email</label>
+      <input type="email" class="lm-input" id="lwEmail" placeholder="ваш@email.com" autocomplete="email"/>
+    </div>
+
+    <div class="lm-field">
+      <label class="lm-label" for="lwPass">Пароль</label>
+      <input type="password" class="lm-input" id="lwPass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+
+    <button class="lm-btn-primary" onclick="doLogin()" id="loginBtn" style="margin-bottom:12px">Войти</button>
+    <a href="register.html" class="lm-btn-ghost">Создать аккаунт</a>
+
+    <div class="lw-demo">
+      <div class="lw-demo-title">Демо-аккаунты</div>
+      <div class="lw-demo-row">Админ: <strong>admin@lumiere.kz</strong> / <strong>admin123</strong></div>
+      <div class="lw-demo-row">Клиент: <strong>aina@example.kz</strong> / <strong>customer123</strong></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ═══ MAIN APP ═════════════════════════════ -->
-<div id="appContainer" class="app-container view-mobile-menu">
-  
-  <!-- ШАПКА ПК ВЕРСИИ -->
-  <header class="hidden md:flex bg-white border-b border-stone-200 h-16 items-center px-8 justify-between sticky top-0 z-50">
-    <a href="index.html" class="text-xl font-bold tracking-tight serif text-black no-underline">LUMI-RE</a>
-    <nav class="flex gap-8 text-[14px] font-medium text-stone-600">
-      <a href="index.html" class="hover:text-black">Главная</a>
-      <a href="index.html#catalog" class="hover:text-black">Каталог</a>
-      <a href="profile.html" class="text-black border-b-2 border-black pb-1">Профиль</a>
-    </nav>
-  </header>
+<!-- ══════════════════════════════════════
+     MAIN APP — "Digital Sanctuary"
+     ══════════════════════════════════════ -->
+<div class="sanctuary-layout" id="sanctuaryApp">
 
-  <!-- ОСНОВНАЯ СЕТКА -->
-  <main class="max-w-6xl mx-auto md:py-10 md:px-6 h-[100dvh] md:h-auto flex flex-col md:flex-row gap-8 relative">
-    
-    <!-- САЙДБАР (Меню) -->
-    <aside id="sidebar" class="w-full md:w-[320px] lg:w-[350px] shrink-0">
-      <!-- Мобильная шапка -->
-      <div class="md:hidden pt-12 pb-6 px-6 relative bg-[#F5F3F0]">
-        <h1 class="text-2xl font-bold serif text-[#1C1C1E]">Профиль</h1>
-        <a href="index.html" class="absolute top-12 right-6 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-black">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </a>
+  <!-- ── Top Navigation Bar ──────────── -->
+  <nav class="sanctuary-topbar" role="navigation" aria-label="Основная навигация">
+    <a href="index.html" class="topbar-logo">LUMIÈRE</a>
+    <div class="topbar-nav">
+      <a href="index.html">Главная</a>
+      <a href="index.html#arrivals">Каталог</a>
+      <a href="profile.html" class="active">Профиль</a>
+    </div>
+  </nav>
+
+  <!-- ── Dashboard Grid ──────────────── -->
+  <div class="sanctuary-grid" id="mainGrid">
+
+    <!-- ════ SIDEBAR ════════════════════ -->
+    <aside class="sanctuary-sidebar" id="sidebar" role="complementary" aria-label="Навигация профиля">
+
+      <!-- Profile Card -->
+      <div class="sidebar-profile">
+        <div class="avatar-aurora" id="avatarWrap" onclick="changeAvatar()">
+          <div class="avatar-letter" id="avaLetter">A</div>
+          <img src="" class="avatar-img" id="avaImg" style="display:none" alt="Аватар"/>
+          <div class="avatar-edit-badge">
+            <i data-lucide="camera" style="width:12px;height:12px"></i>
+          </div>
+        </div>
+        <div class="sidebar-name" id="sidebarName">—</div>
+        <div class="sidebar-email" id="sidebarEmail">—</div>
+        <div class="loyalty-badge">✦ Gold Member</div>
       </div>
 
-      <div class="px-4 md:px-0 pb-24 md:pb-0">
-        <!-- Краткое инфо пользователя (мобилка) -->
-        <div class="md:hidden bg-white rounded-2xl p-4 flex items-center gap-4 mb-6 shadow-sm">
-          <div class="w-14 h-14 rounded-full bg-stone-200 overflow-hidden" id="mobileAvaBox">
-            <img src="" id="mobileAvaImg" class="w-full h-full object-cover hidden"/>
-            <div id="mobileAvaLetter" class="w-full h-full flex items-center justify-center font-bold text-xl text-stone-500">A</div>
-          </div>
-          <div>
-            <h2 class="text-[16px] font-semibold" id="mobileName">-</h2>
-            <p class="text-[13px] text-stone-500" id="mobileEmail">-</p>
-          </div>
-        </div>
+      <!-- Nav: Аккаунт -->
+      <div class="sidebar-section-label">Аккаунт</div>
+      <ul class="nav-menu">
+        <li>
+          <button class="nav-menu-item active" onclick="navTo('personal')" id="menu-personal">
+            <i data-lucide="user" class="nav-icon"></i>
+            Личные данные
+          </button>
+        </li>
+        <li>
+          <button class="nav-menu-item" onclick="navTo('routine')" id="menu-routine">
+            <i data-lucide="sparkles" class="nav-icon"></i>
+            Мой ритуал
+          </button>
+        </li>
+        <li>
+          <button class="nav-menu-item" onclick="navTo('orders')" id="menu-orders">
+            <i data-lucide="shopping-bag" class="nav-icon"></i>
+            Мои заказы
+            <span class="nav-badge" id="ordersBadge" style="display:none">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-menu-item" onclick="navTo('wishlist')" id="menu-wishlist">
+            <i data-lucide="heart" class="nav-icon"></i>
+            Избранное
+            <span class="nav-badge" id="wishBadge" style="display:none">0</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-menu-item" onclick="navTo('addresses')" id="menu-addresses">
+            <i data-lucide="map-pin" class="nav-icon"></i>
+            Адреса доставки
+          </button>
+        </li>
+      </ul>
 
-        <!-- Раздел Аккаунт -->
-        <div class="mb-6">
-          <h3 class="text-[12px] font-bold uppercase tracking-wider ml-4 mb-2 text-[#8E8E93]">Аккаунт</h3>
-          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
-            
-            <button onclick="navToTab('personal')" id="menu-personal" class="nav-item w-full flex items-center justify-between py-3.5 px-4 bg-stone-50">
-              <div class="flex items-center gap-3">
-                <i data-lucide="user" class="w-5 h-5 text-black"></i>
-                <span class="text-[15px] font-semibold text-[#1C1C1E]">Личные данные</span>
-              </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-black md:hidden"></i>
-            </button>
-            <div class="h-[1px] bg-stone-100 ml-12"></div>
-            
-            <button onclick="navToTab('orders')" id="menu-orders" class="nav-item w-full flex items-center justify-between py-3.5 px-4 hover:bg-stone-50 group">
-              <div class="flex items-center gap-3">
-                <i data-lucide="shopping-bag" class="w-5 h-5 text-stone-600 group-hover:text-black"></i>
-                <span class="text-[15px] font-medium text-[#1C1C1E] group-hover:font-semibold">Мои заказы</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span id="ordersBadge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 md:hidden"></i>
-              </div>
-            </button>
-            <div class="h-[1px] bg-stone-100 ml-12"></div>
-            
-            <button onclick="navToTab('wishlist')" id="menu-wishlist" class="nav-item w-full flex items-center justify-between py-3.5 px-4 hover:bg-stone-50 group">
-              <div class="flex items-center gap-3">
-                <i data-lucide="heart" class="w-5 h-5 text-stone-600 group-hover:text-black"></i>
-                <span class="text-[15px] font-medium text-[#1C1C1E] group-hover:font-semibold">Избранное</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span id="wishBadge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
-                <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 md:hidden"></i>
-              </div>
-            </button>
-            <div class="h-[1px] bg-stone-100 ml-12"></div>
+      <!-- Nav: Настройки -->
+      <div class="sidebar-section-label" style="margin-top:28px">Настройки</div>
+      <ul class="nav-menu">
+        <li>
+          <button class="nav-menu-item" onclick="navTo('security')" id="menu-security">
+            <i data-lucide="shield" class="nav-icon"></i>
+            Защита данных
+          </button>
+        </li>
+      </ul>
 
-            <button onclick="navToTab('addresses')" id="menu-addresses" class="nav-item w-full flex items-center justify-between py-3.5 px-4 hover:bg-stone-50 group">
-              <div class="flex items-center gap-3">
-                <i data-lucide="map-pin" class="w-5 h-5 text-stone-600 group-hover:text-black"></i>
-                <span class="text-[15px] font-medium text-[#1C1C1E] group-hover:font-semibold">Адреса доставки</span>
-              </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 md:hidden"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Раздел Настройки -->
-        <div class="mb-6">
-          <h3 class="text-[12px] font-bold uppercase tracking-wider ml-4 mb-2 text-[#8E8E93]">Настройки</h3>
-          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
-            <button onclick="navToTab('security')" id="menu-security" class="nav-item w-full flex items-center justify-between py-3.5 px-4 hover:bg-stone-50 group">
-              <div class="flex items-center gap-3">
-                <i data-lucide="lock" class="w-5 h-5 text-stone-600 group-hover:text-black"></i>
-                <span class="text-[15px] font-medium text-[#1C1C1E] group-hover:font-semibold">Безопасность</span>
-              </div>
-              <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 md:hidden"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Выход -->
-        <button onclick="doLogout()" class="w-full mt-4 flex items-center justify-center gap-2 text-red-500 font-semibold text-[15px] py-4 bg-white rounded-2xl shadow-sm border border-stone-100 hover:bg-red-50">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="doLogout()">
+          <i data-lucide="log-out" style="width:16px;height:16px"></i>
           Выйти из аккаунта
         </button>
       </div>
     </aside>
 
-    <!-- КОНТЕНТ (Формы) -->
-    <section id="content" class="flex-1 bg-white md:rounded-3xl shadow-sm md:border border-stone-100 min-h-screen md:min-h-0">
-      
-      <!-- Мобильная шапка контента -->
-      <div class="md:hidden pt-12 pb-4 px-4 flex items-center bg-white border-b border-stone-100 sticky top-0 z-10">
-        <button onclick="backToMenu()" class="p-2 -ml-2 text-black rounded-full">
-          <i data-lucide="chevron-left" class="w-6 h-6"></i>
+    <!-- ════ CONTENT ════════════════════ -->
+    <section class="sanctuary-content" id="contentArea" role="main">
+
+      <!-- ── Mobile Back Header ──────── -->
+      <div id="mobileBackBar" style="display:none;margin-bottom:16px">
+        <button onclick="backToMenu()" style="display:inline-flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-family:var(--font-ui);font-size:14px;font-weight:600;color:var(--lm-charcoal);padding:8px 0">
+          <i data-lucide="chevron-left" style="width:20px;height:20px"></i>
+          <span id="mobileTitle">Личные данные</span>
         </button>
-        <h1 class="text-lg font-semibold ml-2 text-[#1C1C1E]" id="mobileContentTitle">Личные данные</h1>
       </div>
 
-      <!-- Десктоп шапка контента -->
-      <div class="hidden md:block px-10 pt-10 pb-6 border-b border-stone-100">
-        <h1 class="text-2xl font-bold text-[#1C1C1E]" id="desktopContentTitle">Личные данные</h1>
+      <!-- ╔═══════════════════════════════
+           ║ TAB: ЛИЧНЫЕ ДАННЫЕ
+           ╚═══════════════════════════════ -->
+      <div class="sanctuary-pane active" id="pane-personal">
+        <div class="pane-header">
+          <h1 class="pane-title">Личные данные</h1>
+          <p class="pane-subtitle">Управляйте информацией вашего аккаунта</p>
+        </div>
+
+        <!-- Avatar Large -->
+        <div style="display:flex;align-items:center;gap:24px;margin-bottom:32px">
+          <div class="avatar-aurora" onclick="changeAvatar()" style="width:80px;height:80px;flex-shrink:0">
+            <div class="avatar-letter" id="avaLgLetter" style="width:80px;height:80px;font-size:28px">A</div>
+            <img src="" class="avatar-img" id="avaLgImg" style="display:none;width:80px;height:80px" alt="Аватар"/>
+          </div>
+          <div>
+            <div id="profNameTitle" style="font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--lm-charcoal)">—</div>
+            <div id="profEmailTitle" style="font-size:13px;color:var(--lm-warm-taupe);margin-top:2px">—</div>
+            <button onclick="removeAvatar()" style="margin-top:8px;font-size:12px;font-weight:600;color:var(--lm-soft-brown);background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Удалить фото</button>
+          </div>
+        </div>
+
+        <form onsubmit="saveProfile(event)" class="profile-form-grid">
+          <div class="lm-field">
+            <label class="lm-label" for="pName">ФИО</label>
+            <input type="text" class="lm-input" id="pName" required placeholder="Айна Бекова"/>
+          </div>
+          <div class="lm-field">
+            <label class="lm-label" for="pEmail">Электронная почта</label>
+            <input type="email" class="lm-input" id="pEmail" readonly/>
+          </div>
+          <div class="lm-field">
+            <label class="lm-label" for="pPhone">Номер телефона</label>
+            <input type="tel" class="lm-input" id="pPhone" placeholder="+7 (7xx) xxx-xx-xx"/>
+          </div>
+          <div class="lm-field">
+            <label class="lm-label" for="pAvatar">URL аватара</label>
+            <input type="url" class="lm-input" id="pAvatar" placeholder="https://..."/>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="lm-btn-primary">
+              <i data-lucide="check" style="width:16px;height:16px"></i>
+              Сохранить изменения
+            </button>
+          </div>
+        </form>
       </div>
 
-      <div class="px-6 md:px-10 py-6 md:py-8 pb-32 md:pb-10 relative">
-        
-        <!-- ============================================== -->
-        <!-- TAB: ЛИЧНЫЕ ДАННЫЕ -->
-        <div id="tab-personal" class="tab-pane active">
-          
-          <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-            <div class="relative cursor-pointer" onclick="changeAvatar()">
-              <div class="w-24 h-24 rounded-full overflow-hidden bg-stone-200 border-2 border-white shadow-md relative group">
-                <img src="" id="avaLgImg" class="w-full h-full object-cover hidden" />
-                <div id="avaLgLetter" class="w-full h-full flex items-center justify-center font-bold text-3xl text-stone-500">A</div>
-                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
-                  <i data-lucide="camera" class="w-8 h-8 text-white"></i>
+      <!-- ╔═══════════════════════════════
+           ║ TAB: МОЙ РИТУАЛ
+           ╚═══════════════════════════════ -->
+      <div class="sanctuary-pane" id="pane-routine">
+        <div class="pane-header">
+          <h1 class="pane-title">Мой ритуал</h1>
+          <p class="pane-subtitle">Ваш персональный план ухода за красотой</p>
+        </div>
+
+        <div style="display:grid;gap:20px">
+          <!-- Morning -->
+          <div class="routine-card">
+            <div class="routine-title-row">
+              <span class="routine-period">Утренний ритуал</span>
+              <span class="routine-emoji">☀️</span>
+            </div>
+            <ul class="routine-steps" id="morningSteps">
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Очищение</div>
+                  <div class="routine-step-product">Gentle Foam Cleanser · 150ml</div>
                 </div>
-              </div>
-              <button class="absolute bottom-0 right-0 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg pointer-events-none">
-                <i data-lucide="edit-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-            <div class="text-center md:text-left pt-2">
-              <h2 class="text-xl font-bold text-[#1C1C1E]" id="profNameTitle">Имя Фамилия</h2>
-              <p class="text-sm mt-1 text-[#8E8E93]" id="profEmailTitle">email@example.com</p>
-              <button class="mt-3 text-[13px] font-medium text-black hover:underline" onclick="removeAvatar()">
-                Удалить фото
-              </button>
-            </div>
+              </li>
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Тонизирование</div>
+                  <div class="routine-step-product">Rose Water Toner · 200ml</div>
+                </div>
+              </li>
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Сыворотка</div>
+                  <div class="routine-step-product">Vitamin C Radiance Serum · 30ml</div>
+                </div>
+              </li>
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Увлажнение + SPF</div>
+                  <div class="routine-step-product">Daily Glow Moisturizer SPF 30 · 50ml</div>
+                </div>
+              </li>
+            </ul>
           </div>
 
-          <form onsubmit="saveProfile(event)">
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">ФИО</label>
-              <input type="text" id="pName" required class="w-full bg-white border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none focus:border-black focus:ring-1 focus:ring-black text-[#1C1C1E]" />
+          <!-- Evening -->
+          <div class="routine-card">
+            <div class="routine-title-row">
+              <span class="routine-period">Вечерний ритуал</span>
+              <span class="routine-emoji">🌙</span>
             </div>
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">Электронная почта</label>
-              <input type="email" id="pEmail" readonly class="w-full bg-stone-100 text-stone-500 border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none" />
-            </div>
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">Номер телефона</label>
-              <input type="tel" id="pPhone" placeholder="+7 (7xx) xxx-xx-xx" class="w-full bg-white border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none focus:border-black focus:ring-1 focus:ring-black text-[#1C1C1E]" />
-            </div>
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">URL Аватара (если есть ссылка)</label>
-              <input type="url" id="pAvatar" class="w-full bg-white border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none focus:border-black focus:ring-1 focus:ring-black text-[#1C1C1E]" />
-            </div>
-            
-            <div class="flex justify-end mt-8">
-              <button type="submit" class="w-full md:w-auto bg-black text-white px-8 py-3.5 rounded-xl font-semibold text-[15px] hover:bg-stone-800 transition shadow-lg flex justify-center items-center gap-2">
-                Сохранить изменения
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- TAB: МОИ ЗАКАЗЫ -->
-        <div id="tab-orders" class="tab-pane">
-          <div class="flex pb-4 mb-4 gap-2 overflow-x-auto no-scrollbar">
-            <button onclick="filterOrders('all')" class="bg-black text-white px-4 py-2 rounded-full text-sm font-medium shrink-0 whitespace-nowrap">Все заказы</button>
-            <button onclick="filterOrders('processing')" class="bg-stone-100 text-stone-600 px-4 py-2 rounded-full text-sm font-medium shrink-0 whitespace-nowrap hover:bg-stone-200">В обработке</button>
-            <button onclick="filterOrders('transit')" class="bg-stone-100 text-stone-600 px-4 py-2 rounded-full text-sm font-medium shrink-0 whitespace-nowrap hover:bg-stone-200">В пути</button>
-          </div>
-          <div id="ordersContainer"></div>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- TAB: ИЗБРАННОЕ -->
-        <div id="tab-wishlist" class="tab-pane">
-          <p class="text-[14px] text-stone-500 mb-6" id="wishCount"></p>
-          <div id="wishlistGrid" class="wl-grid"></div>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- TAB: АДРЕСА -->
-        <div id="tab-addresses" class="tab-pane">
-          <button onclick="openAddrModal(null)" class="mb-6 bg-white border-2 border-black text-black px-6 py-3 rounded-xl font-semibold text-[14px] w-full md:w-auto hover:bg-stone-50">
-            + Добавить новый адрес
-          </button>
-          <div id="addrList" class="flex flex-col gap-4"></div>
-        </div>
-
-        <!-- ============================================== -->
-        <!-- TAB: БЕЗОПАСНОСТЬ -->
-        <div id="tab-security" class="tab-pane">
-          <p class="text-[14px] mb-8 text-[#8E8E93]">
-            Обновите свой пароль для обеспечения безопасности аккаунта. Рекомендуем использовать сложный пароль.
-          </p>
-          <form onsubmit="changePassword(event)">
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">Текущий пароль</label>
-              <input type="password" id="passOld" placeholder="••••••••" required class="w-full bg-white border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none focus:border-black text-[#1C1C1E]" />
-            </div>
-            <div class="h-[1px] bg-stone-200 w-full my-6"></div>
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">Новый пароль</label>
-              <input type="password" id="passNew" placeholder="Минимум 6 символов" required class="w-full bg-white border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none focus:border-black text-[#1C1C1E]" />
-            </div>
-            <div class="mb-5">
-              <label class="block text-[13px] font-medium mb-1.5 ml-1 text-[#8E8E93]">Подтвердите новый пароль</label>
-              <input type="password" id="passNew2" placeholder="••••••••" required class="w-full bg-white border border-[#E5E5EA] px-4 py-3 rounded-xl text-[15px] outline-none focus:border-black text-[#1C1C1E]" />
-            </div>
-            
-            <div id="passErr" class="text-red-500 text-sm font-semibold mb-4 hidden"></div>
-
-            <div class="flex justify-end mt-4">
-              <button type="submit" class="w-full md:w-auto bg-black text-white px-8 py-3.5 rounded-xl font-semibold text-[15px] hover:bg-stone-800 transition shadow-lg">
-                Обновить пароль
-              </button>
-            </div>
-          </form>
-
-          <div class="mt-16 border-2 border-red-100 bg-red-50/50 rounded-2xl p-6">
-            <h4 class="text-red-600 font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-              Опасная зона
-            </h4>
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <p class="font-medium">Удалить аккаунт</p>
-                <p class="text-sm text-stone-500">Все ваши данные, заказы и настройки будут стерты навсегда.</p>
-              </div>
-              <button onclick="confirmDelete()" class="px-6 py-2.5 bg-white border border-red-200 text-red-600 font-semibold rounded-xl hover:bg-red-50 w-full md:w-auto">
-                Удалить аккаунт
-              </button>
-            </div>
+            <ul class="routine-steps" id="eveningSteps">
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Демакияж</div>
+                  <div class="routine-step-product">Micellar Oil Cleanser · 200ml</div>
+                </div>
+              </li>
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Очищение</div>
+                  <div class="routine-step-product">Gentle Foam Cleanser · 150ml</div>
+                </div>
+              </li>
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Ночная сыворотка</div>
+                  <div class="routine-step-product">Retinol Renewal Serum · 30ml</div>
+                </div>
+              </li>
+              <li class="routine-step" onclick="toggleStep(this)">
+                <div class="routine-check">✓</div>
+                <div class="routine-step-info">
+                  <div class="routine-step-name">Ночной крем</div>
+                  <div class="routine-step-product">Silk Recovery Night Cream · 50ml</div>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
 
+        <!-- Concierge CTA -->
+        <div class="lm-card-flat" style="margin-top:24px;text-align:center">
+          <div style="font-size:28px;margin-bottom:8px">💬</div>
+          <div style="font-family:var(--font-display);font-size:18px;font-weight:500;margin-bottom:4px">Concierge Beauty</div>
+          <div style="font-size:13px;color:var(--lm-warm-taupe);margin-bottom:16px">Персональная консультация с косметологом LUMIÈRE</div>
+          <button class="lm-btn-primary" style="width:auto;padding:12px 32px" onclick="toast('Сервис Concierge Beauty скоро откроется')">Записаться на консультацию</button>
+        </div>
       </div>
-    </section>
-  </main>
 
-  <!-- МОБИЛЬНАЯ НИЖНЯЯ ПАНЕЛЬ -->
-  <div id="mobile-bottom-nav" class="md:hidden fixed bottom-0 w-full bg-white border-t border-stone-100 pb-safe pt-2 px-6 flex justify-between items-center z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-transform duration-300">
-    <a href="index.html" class="flex flex-col items-center gap-1 p-2 text-stone-400 no-underline hover:text-black">
-      <i data-lucide="home" class="w-6 h-6 stroke-[1.5]"></i>
-      <span class="text-[10px] font-medium">Главная</span>
-    </a>
-    <a href="index.html#catalog" class="flex flex-col items-center gap-1 p-2 text-stone-400 no-underline hover:text-black">
-      <i data-lucide="search" class="w-6 h-6 stroke-[1.5]"></i>
-      <span class="text-[10px] font-medium">Каталог</span>
-    </a>
-    <button onclick="navToTab('wishlist')" class="flex flex-col items-center gap-1 p-2 text-stone-400 hover:text-black">
-      <i data-lucide="heart" class="w-6 h-6 stroke-[1.5]"></i>
-      <span class="text-[10px] font-medium">Избранное</span>
-    </button>
-    <a href="cart.html" class="flex flex-col items-center gap-1 p-2 text-stone-400 no-underline hover:text-black">
-      <i data-lucide="shopping-cart" class="w-6 h-6 stroke-[1.5]"></i>
-      <span class="text-[10px] font-medium">Корзина</span>
-    </a>
-    <button onclick="backToMenu()" class="flex flex-col items-center gap-1 p-2 text-black">
-      <i data-lucide="user" class="w-6 h-6 stroke-2 fill-current"></i>
-      <span class="text-[10px] font-medium">Профиль</span>
-    </button>
+      <!-- ╔═══════════════════════════════
+           ║ TAB: МОИ ЗАКАЗЫ
+           ╚═══════════════════════════════ -->
+      <div class="sanctuary-pane" id="pane-orders">
+        <div class="pane-header">
+          <h1 class="pane-title">Мои заказы</h1>
+          <p class="pane-subtitle">История ваших покупок и статус доставки</p>
+        </div>
+
+        <div class="filter-pills">
+          <button class="filter-pill active" onclick="filterOrders('all',this)">Все заказы</button>
+          <button class="filter-pill" onclick="filterOrders('processing',this)">В обработке</button>
+          <button class="filter-pill" onclick="filterOrders('transit',this)">В пути</button>
+          <button class="filter-pill" onclick="filterOrders('delivered',this)">Доставлены</button>
+        </div>
+
+        <div id="ordersContainer"></div>
+      </div>
+
+      <!-- ╔═══════════════════════════════
+           ║ TAB: ИЗБРАННОЕ
+           ╚═══════════════════════════════ -->
+      <div class="sanctuary-pane" id="pane-wishlist">
+        <div class="pane-header">
+          <h1 class="pane-title">Избранное</h1>
+          <p class="pane-subtitle" id="wishCount"></p>
+        </div>
+        <div class="wishlist-grid" id="wishlistGrid"></div>
+      </div>
+
+      <!-- ╔═══════════════════════════════
+           ║ TAB: АДРЕСА ДОСТАВКИ
+           ╚═══════════════════════════════ -->
+      <div class="sanctuary-pane" id="pane-addresses">
+        <div class="pane-header">
+          <h1 class="pane-title">Адреса доставки</h1>
+          <p class="pane-subtitle">Ваши сохранённые адреса для быстрого оформления</p>
+        </div>
+        <button class="lm-btn-ghost" onclick="openAddrModal(null)" style="width:auto;margin-bottom:24px">
+          <i data-lucide="plus" style="width:16px;height:16px"></i>
+          Добавить адрес
+        </button>
+        <div id="addrList" style="display:flex;flex-direction:column;gap:16px"></div>
+      </div>
+
+      <!-- ╔═══════════════════════════════
+           ║ TAB: ЗАЩИТА ДАННЫХ
+           ╚═══════════════════════════════ -->
+      <div class="sanctuary-pane" id="pane-security">
+        <div class="pane-header">
+          <h1 class="pane-title">Защита данных</h1>
+          <p class="pane-subtitle">Обновите пароль для обеспечения безопасности вашего аккаунта</p>
+        </div>
+
+        <form onsubmit="changePassword(event)" class="profile-form-grid">
+          <div class="lm-field">
+            <label class="lm-label" for="passOld">Текущий пароль</label>
+            <input type="password" class="lm-input" id="passOld" placeholder="••••••••" required/>
+          </div>
+
+          <div style="height:1px;background:rgba(215,199,174,.15);margin:8px 0"></div>
+
+          <div class="lm-field">
+            <label class="lm-label" for="passNew">Новый пароль</label>
+            <input type="password" class="lm-input" id="passNew" placeholder="Минимум 6 символов" required/>
+          </div>
+          <div class="lm-field">
+            <label class="lm-label" for="passNew2">Подтвердите пароль</label>
+            <input type="password" class="lm-input" id="passNew2" placeholder="••••••••" required/>
+          </div>
+
+          <div id="passErr" style="color:#9B3030;font-size:13px;font-weight:600;display:none"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="lm-btn-primary">
+              <i data-lucide="lock" style="width:16px;height:16px"></i>
+              Обновить пароль
+            </button>
+          </div>
+        </form>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <div class="danger-title">
+            <i data-lucide="alert-triangle" style="width:18px;height:18px"></i>
+            Удаление аккаунта
+          </div>
+          <p class="danger-desc">Все данные, заказы и настройки будут стёрты безвозвратно.</p>
+          <button class="btn-danger" onclick="confirmDelete()">Удалить аккаунт</button>
+        </div>
+      </div>
+
+    </section>
   </div>
 
+  <!-- ── Mobile Bottom Dock ──────────── -->
+  <div class="mobile-dock" id="mobileDock">
+    <a href="index.html" class="dock-item">
+      <i data-lucide="home"></i>
+      <span>Главная</span>
+    </a>
+    <a href="index.html#arrivals" class="dock-item">
+      <i data-lucide="search"></i>
+      <span>Каталог</span>
+    </a>
+    <button class="dock-item" onclick="navTo('wishlist')">
+      <i data-lucide="heart"></i>
+      <span>Избранное</span>
+    </button>
+    <button class="dock-item active-dock" onclick="backToMenu()">
+      <i data-lucide="user"></i>
+      <span>Профиль</span>
+    </button>
+  </div>
 </div>
 
-<!-- ─── MODAL Обертка ─── -->
-<div id="addrModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="flex justify-between items-center mb-6">
-      <h3 id="addrModalTitle" class="text-xl font-bold">Новый адрес</h3>
-      <button onclick="closeAddrModal()" class="text-stone-400 hover:text-black"><i data-lucide="x" class="w-6 h-6"></i></button>
+<!-- ═══ Address Modal ═══════════════════ -->
+<div class="modal-glass" id="addrModal">
+  <div class="modal-glass-content">
+    <div class="modal-glass-header">
+      <h3 class="modal-glass-title" id="addrModalTitle">Новый адрес</h3>
+      <button class="modal-close-btn" onclick="closeAddrModal()">✕</button>
     </div>
     <input type="hidden" id="aId"/>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div class="md:col-span-2">
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Метка (напр. Дом)</label>
-        <input type="text" id="aLabel" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
+    <div class="profile-form-grid">
+      <div class="form-row-2">
+        <div class="lm-field">
+          <label class="lm-label" for="aLabel">Метка</label>
+          <input type="text" class="lm-input" id="aLabel" placeholder="Дом"/>
+        </div>
+        <div class="lm-field">
+          <label class="lm-label" for="aName">Получатель *</label>
+          <input type="text" class="lm-input" id="aName"/>
+        </div>
       </div>
-      <div>
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Получатель *</label>
-        <input type="text" id="aName" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
+      <div class="form-row-2">
+        <div class="lm-field">
+          <label class="lm-label" for="aPhone">Телефон</label>
+          <input type="text" class="lm-input" id="aPhone"/>
+        </div>
+        <div class="lm-field">
+          <label class="lm-label" for="aCity">Город *</label>
+          <input type="text" class="lm-input" id="aCity" placeholder="Алматы"/>
+        </div>
       </div>
-      <div>
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Телефон</label>
-        <input type="text" id="aPhone" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
+      <div class="lm-field">
+        <label class="lm-label" for="aStreet">Улица / дом *</label>
+        <input type="text" class="lm-input" id="aStreet"/>
       </div>
-      <div>
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Город *</label>
-        <input type="text" id="aCity" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
+      <div class="form-row-2">
+        <div class="lm-field">
+          <label class="lm-label" for="aApt">Кв / Офис</label>
+          <input type="text" class="lm-input" id="aApt"/>
+        </div>
+        <div class="lm-field">
+          <label class="lm-label" for="aPostal">Индекс</label>
+          <input type="text" class="lm-input" id="aPostal"/>
+        </div>
       </div>
-      <div>
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Улица / дом *</label>
-        <input type="text" id="aStreet" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
+      <div class="lm-field">
+        <label class="lm-label" for="aNotes">Инструкции курьеру</label>
+        <input type="text" class="lm-input" id="aNotes" placeholder="Позвонить за 15 минут"/>
       </div>
-      <div>
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Кв / Офис</label>
-        <input type="text" id="aApt" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
-      </div>
-      <div>
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Индекс</label>
-        <input type="text" id="aPostal" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
-      </div>
-      <div class="md:col-span-2">
-        <label class="block text-[12px] font-semibold text-stone-500 uppercase tracking-widest mb-1">Инструкции курьеру</label>
-        <input type="text" id="aNotes" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black" />
-      </div>
-      <div class="md:col-span-2 flex items-center gap-2 mt-2">
-        <input type="checkbox" id="aDefault" class="w-5 h-5 accent-black rounded cursor-pointer" />
-        <label for="aDefault" class="text-sm font-medium cursor-pointer">Сделать основным адресом</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <input type="checkbox" id="aDefault" style="width:18px;height:18px;accent-color:var(--lm-charcoal);cursor:pointer"/>
+        <label for="aDefault" style="font-size:13px;font-weight:500;cursor:pointer">Основной адрес</label>
       </div>
     </div>
-    <div class="flex gap-3">
-      <button onclick="saveAddrModal()" class="flex-1 bg-black text-white py-3 rounded-xl font-semibold hover:bg-stone-800">Сохранить</button>
-      <button onclick="closeAddrModal()" class="flex-1 bg-white border border-stone-300 text-black py-3 rounded-xl font-semibold hover:bg-stone-50">Отмена</button>
+    <div style="display:flex;gap:12px;margin-top:24px">
+      <button class="lm-btn-primary" onclick="saveAddrModal()" style="flex:1">Сохранить</button>
+      <button class="lm-btn-ghost" onclick="closeAddrModal()" style="flex:1">Отмена</button>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+     ═══════════════════════════════════════ -->
 <script src="db.js"></script>
 <script>
 'use strict';
+
+// Init Lucide icons
 lucide.createIcons();
+
 let currentUser = null;
 
 const tabTitles = {
-  'personal': 'Личные данные',
-  'orders': 'Мои заказы',
-  'wishlist': 'Избранное',
-  'addresses': 'Адреса доставки',
-  'security': 'Безопасность',
+  personal: 'Личные данные',
+  routine: 'Мой ритуал',
+  orders: 'Мои заказы',
+  wishlist: 'Избранное',
+  addresses: 'Адреса доставки',
+  security: 'Защита данных',
 };
 
-// ── Init ────────────────────────────────
-async function init(){
-  currentUser = await getCurrentUser();
-  if(!currentUser){
+// ═══ Init ════════════════════════════════
+async function init() {
+  try {
+    currentUser = await getCurrentUser();
+  } catch(e) { currentUser = null; }
+
+  if (!currentUser) {
     document.getElementById('loginWall').style.display = 'flex';
-    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('sanctuaryApp').classList.remove('visible');
   } else {
     document.getElementById('loginWall').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('sanctuaryApp').classList.add('visible');
     loadProfile();
     await Promise.all([
       renderOrders(),
@@ -491,68 +532,46 @@ async function init(){
   }
 }
 
-// ── Tab Navigation ──────────────────────
-function navToTab(tabId) {
-  // Update UI state for mobile
-  const app = document.getElementById('appContainer');
-  app.classList.remove('view-mobile-menu');
-  app.classList.add('view-mobile-content');
+// ═══ Navigation ═════════════════════════
+function navTo(tabId) {
+  // Mobile: show content
+  const grid = document.getElementById('mainGrid');
+  grid.classList.remove('mobile-menu');
+  grid.classList.add('mobile-content');
+  document.getElementById('mobileBackBar').style.display = 'block';
+  document.getElementById('mobileTitle').textContent = tabTitles[tabId] || '';
 
-  // Update classes
-  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + tabId).classList.add('active');
+  // Update panes
+  document.querySelectorAll('.sanctuary-pane').forEach(el => el.classList.remove('active'));
+  const pane = document.getElementById('pane-' + tabId);
+  if (pane) pane.classList.add('active');
 
-  // Update Sidebar active state
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.remove('bg-stone-50');
-    el.querySelector('span').classList.remove('font-semibold');
-    el.querySelector('i').classList.remove('text-black');
-    el.querySelector('span').classList.add('font-medium');
-    el.querySelector('i').classList.add('text-stone-600');
-  });
-  
-  const activeBtn = document.getElementById('menu-' + tabId);
-  if(activeBtn) {
-    activeBtn.classList.add('bg-stone-50');
-    activeBtn.querySelector('span').classList.add('font-semibold');
-    activeBtn.querySelector('span').classList.remove('font-medium');
-    activeBtn.querySelector('i').classList.add('text-black');
-    activeBtn.querySelector('i').classList.remove('text-stone-600');
-  }
-
-  // Update Titles
-  document.getElementById('mobileContentTitle').textContent = tabTitles[tabId];
-  document.getElementById('desktopContentTitle').textContent = tabTitles[tabId];
+  // Update sidebar nav
+  document.querySelectorAll('.nav-menu-item').forEach(el => el.classList.remove('active'));
+  const btn = document.getElementById('menu-' + tabId);
+  if (btn) btn.classList.add('active');
 }
 
 function backToMenu() {
-  const app = document.getElementById('appContainer');
-  app.classList.remove('view-mobile-content');
-  app.classList.add('view-mobile-menu');
+  const grid = document.getElementById('mainGrid');
+  grid.classList.remove('mobile-content');
+  grid.classList.add('mobile-menu');
+  document.getElementById('mobileBackBar').style.display = 'none';
 }
 
-// ── Profile ─────────────────────────────
-function loadProfile(){
+// ═══ Profile ════════════════════════════
+function loadProfile() {
   const u = currentUser;
-  // Side mobile
-  document.getElementById('mobileName').textContent = u.full_name;
-  document.getElementById('mobileEmail').textContent = u.email;
-  
-  if(u.avatar_url){
-    document.getElementById('mobileAvaImg').src = u.avatar_url;
-    document.getElementById('mobileAvaImg').classList.remove('hidden');
-    document.getElementById('mobileAvaLetter').classList.add('hidden');
-    document.getElementById('avaLgImg').src = u.avatar_url;
-    document.getElementById('avaLgImg').classList.remove('hidden');
-    document.getElementById('avaLgLetter').classList.add('hidden');
+
+  // Sidebar
+  document.getElementById('sidebarName').textContent = u.full_name;
+  document.getElementById('sidebarEmail').textContent = u.email;
+
+  // Avatar
+  if (u.avatar_url) {
+    showAvatar(u.avatar_url);
   } else {
-    const l = u.full_name[0].toUpperCase();
-    document.getElementById('mobileAvaImg').classList.add('hidden');
-    document.getElementById('mobileAvaLetter').classList.remove('hidden');
-    document.getElementById('mobileAvaLetter').textContent = l;
-    document.getElementById('avaLgImg').classList.add('hidden');
-    document.getElementById('avaLgLetter').classList.remove('hidden');
-    document.getElementById('avaLgLetter').textContent = l;
+    showAvatarLetter(u.full_name[0].toUpperCase());
   }
 
   // Large header
@@ -566,86 +585,158 @@ function loadProfile(){
   document.getElementById('pAvatar').value = u.avatar_url || '';
 }
 
-function saveProfile(e){
-  e.preventDefault();
-  const n = document.getElementById('pName').value.trim();
-  updateUser(currentUser.id, {
-    full_name: n, 
-    phone: document.getElementById('pPhone').value.trim(), 
-    avatar_url: document.getElementById('pAvatar').value.trim()
-  }).then(r => {
-    if(r.error) { toast(r.error, 'alert-circle', 'red-400'); return; }
-    currentUser = r;
-    loadProfile();
-    toast('Изменения успешно сохранены', 'check-circle-2', 'green-400');
+function showAvatar(url) {
+  ['avaImg', 'avaLgImg'].forEach(id => {
+    const img = document.getElementById(id);
+    img.src = url; img.style.display = 'block';
+  });
+  ['avaLetter', 'avaLgLetter'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+function showAvatarLetter(letter) {
+  ['avaImg', 'avaLgImg'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  ['avaLetter', 'avaLgLetter'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.display = 'flex';
+    el.textContent = letter;
   });
 }
 
-function changeAvatar(){
-  const url = prompt('Введите URL фото профиля:');
-  if(url){ document.getElementById('pAvatar').value = url; saveProfile(new Event('submit')); }
+function saveProfile(e) {
+  e.preventDefault();
+  updateUser(currentUser.id, {
+    full_name: document.getElementById('pName').value.trim(),
+    phone: document.getElementById('pPhone').value.trim(),
+    avatar_url: document.getElementById('pAvatar').value.trim()
+  }).then(r => {
+    if (r.error) { toast(r.error, 'error'); return; }
+    currentUser = r;
+    loadProfile();
+    toast('Изменения сохранены', 'success');
+  });
 }
-function removeAvatar(){
+
+function changeAvatar() {
+  const url = prompt('Введите URL фото профиля:');
+  if (url) { document.getElementById('pAvatar').value = url; saveProfile(new Event('submit')); }
+}
+function removeAvatar() {
   document.getElementById('pAvatar').value = '';
   saveProfile(new Event('submit'));
 }
 
+// ═══ Badges ═════════════════════════════
 async function updateBadges() {
-  const orders = await getOrdersByUser(currentUser.id);
-  const activeOrders = (orders||[]).filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
-  const ob = document.getElementById('ordersBadge');
-  if(activeOrders > 0){ ob.textContent = activeOrders; ob.classList.remove('hidden'); } else { ob.classList.add('hidden'); }
+  try {
+    const orders = await getOrdersByUser(currentUser.id);
+    const active = (orders || []).filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+    const ob = document.getElementById('ordersBadge');
+    if (active > 0) { ob.textContent = active; ob.style.display = 'inline'; } else { ob.style.display = 'none'; }
+  } catch(e) {}
 
-  const wish = await getWishlist(currentUser.id);
-  const wb = document.getElementById('wishBadge');
-  if((wish||[]).length > 0){ wb.textContent = wish.length; wb.classList.remove('hidden'); } else { wb.classList.add('hidden'); }
+  try {
+    const wish = await getWishlist(currentUser.id);
+    const wb = document.getElementById('wishBadge');
+    if ((wish || []).length > 0) { wb.textContent = wish.length; wb.style.display = 'inline'; } else { wb.style.display = 'none'; }
+  } catch(e) {}
 }
 
+// ═══ Routine Builder ════════════════════
+function toggleStep(el) {
+  el.classList.toggle('done');
+  // Persist in localStorage
+  saveRoutineState();
+}
 
-// ── Orders ────────────────────────────────
-const statusMap={processing:{lbl:'В обработке',cls:'s-processing'},transit:{lbl:'В пути',cls:'s-transit'},in_transit:{lbl:'В пути',cls:'s-transit'},delivered:{lbl:'Доставлено',cls:'s-delivered'},cancelled:{lbl:'Отменён',cls:'s-cancelled'}};
-const progressSteps=['Оформлен','Подтверждён','В пути','Доставлен'];
-const statusProgress={processing:1,transit:2,in_transit:2,delivered:4,cancelled:0};
+function saveRoutineState() {
+  const morning = [...document.querySelectorAll('#morningSteps .routine-step')].map(s => s.classList.contains('done'));
+  const evening = [...document.querySelectorAll('#eveningSteps .routine-step')].map(s => s.classList.contains('done'));
+  localStorage.setItem('lm_routine', JSON.stringify({ morning, evening, date: new Date().toDateString() }));
+}
 
-function filterOrders(filter){
+function loadRoutineState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('lm_routine'));
+    if (!saved || saved.date !== new Date().toDateString()) return; // Reset daily
+    saved.morning.forEach((done, i) => {
+      const steps = document.querySelectorAll('#morningSteps .routine-step');
+      if (steps[i] && done) steps[i].classList.add('done');
+    });
+    saved.evening.forEach((done, i) => {
+      const steps = document.querySelectorAll('#eveningSteps .routine-step');
+      if (steps[i] && done) steps[i].classList.add('done');
+    });
+  } catch(e) {}
+}
+
+// ═══ Orders ═════════════════════════════
+const statusMap = {
+  processing: { lbl: 'В обработке', cls: 'status-processing' },
+  transit: { lbl: 'В пути', cls: 'status-transit' },
+  in_transit: { lbl: 'В пути', cls: 'status-transit' },
+  delivered: { lbl: 'Доставлено', cls: 'status-delivered' },
+  cancelled: { lbl: 'Отменён', cls: 'status-cancelled' }
+};
+const progressSteps = ['Оформлен', 'Подтверждён', 'В пути', 'Доставлен'];
+const statusProgress = { processing: 1, transit: 2, in_transit: 2, delivered: 4, cancelled: 0 };
+
+function filterOrders(filter, btn) {
+  // Update pills
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
   getOrdersByUser(currentUser.id).then(orders => {
-    if(!Array.isArray(orders)) orders=[];
-    if(filter!=='all') orders=orders.filter(o=>o.status===filter||(filter==='transit'&&o.status==='in_transit'));
+    if (!Array.isArray(orders)) orders = [];
+    if (filter !== 'all') orders = orders.filter(o => o.status === filter || (filter === 'transit' && o.status === 'in_transit'));
     renderOrderList(orders);
   });
 }
 
-async function renderOrders(){ 
+async function renderOrders() {
   const orders = await getOrdersByUser(currentUser.id);
-  renderOrderList(Array.isArray(orders) ? orders : []); 
+  renderOrderList(Array.isArray(orders) ? orders : []);
 }
 
-function renderOrderList(orders){
+function renderOrderList(orders) {
   const c = document.getElementById('ordersContainer');
-  if(!orders.length){ 
-    c.innerHTML = '<div class="text-center py-10 bg-stone-50 rounded-2xl border border-stone-100"><i data-lucide="package" class="w-12 h-12 mx-auto text-stone-300 mb-4"></i><h3 class="font-bold text-lg">Заказов пока нет</h3><p class="text-sm text-stone-500 mt-2">Ваши покупки появятся здесь.</p></div>'; 
-    lucide.createIcons();
-    return; 
+  if (!orders.length) {
+    c.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">Заказов пока нет</div>
+      <div class="empty-desc">Ваши покупки появятся здесь</div>
+      <a href="index.html#arrivals" class="empty-link">Перейти в каталог</a>
+    </div>`;
+    return;
   }
+
   c.innerHTML = orders.map(o => {
-    const sm = statusMap[o.status] || {lbl: o.status, cls: 's-processing'};
+    const sm = statusMap[o.status] || { lbl: o.status, cls: 'status-processing' };
     const prog = statusProgress[o.status] || 0;
-    const stepsHtml = progressSteps.map((s,i) => `<div class="op-step ${i<prog?'done':''} ${i===prog-1?'active':''}"><div class="op-dot">${i<prog?'✓':''}</div><div class="op-lbl">${s}</div></div>`).join('');
+    const stepsHtml = progressSteps.map((s, i) =>
+      `<div class="progress-node ${i < prog ? 'done' : ''}">
+        <div class="progress-dot">${i < prog ? '✓' : ''}</div>
+        <div class="progress-label">${s}</div>
+      </div>`
+    ).join('');
     const itemsStr = o.items.map(i => `${i.name} × ${i.qty}`).join('<br/>');
-    
-    return `
-    <div class="order-card border border-[#E5E5EA]">
-      <div class="order-top border-b border-stone-100 pb-3">
-        <div><span class="font-bold text-sm"># ${o.id.toUpperCase()}</span> <span class="text-xs text-stone-500 ml-2">${new Date(o.date).toLocaleDateString('ru-RU')}</span></div>
-        <span class="status ${sm.cls}">${sm.lbl}</span>
+
+    return `<div class="order-card-premium">
+      <div class="order-top-row">
+        <div>
+          <span class="order-id"># ${o.id.toUpperCase()}</span>
+          <span class="order-date">${new Date(o.date).toLocaleDateString('ru-RU')}</span>
+        </div>
+        <span class="status-pill ${sm.cls}">${sm.lbl}</span>
       </div>
-      ${o.status!=='delivered'&&o.status!=='cancelled' ? `<div class="order-progress my-3">${stepsHtml}</div>` : ''}
-      ${o.track ? `<div class="flex items-center justify-between bg-stone-50 rounded-lg p-3 text-sm mt-2"><span class="font-semibold select-all">${o.track}</span><button onclick="copyTrack('${o.track}')" class="text-blue-600 text-xs font-bold uppercase tracking-wider">Копировать</button></div>` : ''}
-      <div class="text-[13px] text-stone-600 leading-relaxed py-2">${itemsStr}</div>
-      <div class="flex items-center justify-between pt-3 border-t border-stone-100">
-        <div class="font-bold text-[18px]">₸ ${o.total.toLocaleString('ru-KZ')}</div>
-        <button onclick="downloadReceipt('${o.id}')" class="text-[12px] font-semibold flex items-center gap-1 bg-white border border-stone-200 px-3 py-1.5 rounded-lg hover:bg-stone-50 hover:text-black">
-          <i data-lucide="file-text" class="w-4 h-4"></i> Чек
+      ${o.status !== 'delivered' && o.status !== 'cancelled' ? `<div class="order-progress-bar">${stepsHtml}</div>` : ''}
+      <div class="order-items-text">${itemsStr}</div>
+      <div class="order-bottom-row">
+        <div class="order-total">₸ ${o.total.toLocaleString('ru-KZ')}</div>
+        <button class="btn-receipt" onclick="toast('Загрузка чека...')">
+          <i data-lucide="file-text" style="width:14px;height:14px"></i> Чек
         </button>
       </div>
     </div>`;
@@ -653,201 +744,260 @@ function renderOrderList(orders){
   lucide.createIcons();
 }
 
-function copyTrack(t){ navigator.clipboard.writeText(t).then(()=>toast('Трек-номер скопирован')); }
-function downloadReceipt(orderId){
-  // Оставляем существующую логику
-  toast('Функция загрузки чека в разработке...');
-}
-
-// ── Wishlist ──────────────────────────────
-async function renderWishlist(){
+// ═══ Wishlist ═══════════════════════════
+async function renderWishlist() {
   const [ids, prodsAll] = await Promise.all([getWishlist(currentUser.id), getProducts()]);
   const prods = Array.isArray(prodsAll) ? prodsAll : [];
   const wishIds = Array.isArray(ids) ? ids : [];
   const wl = prods.filter(p => wishIds.includes(p.id));
-  const EMOJIS = {skincare:'🧴',makeup:'💄',fragrance:'🌸',body:'✨'};
-  
+  const EMOJIS = { skincare: '🧴', makeup: '💄', fragrance: '🌸', body: '✨' };
+
   const c = document.getElementById('wishlistGrid');
   const cnt = document.getElementById('wishCount');
-  cnt.textContent = wl.length ? `Сохранено ${wl.length} товаров` : '';
-  
-  if(!wl.length){ 
-    c.innerHTML = '<div class="col-span-full text-center py-12 bg-stone-50 rounded-2xl border border-stone-100"><i data-lucide="heart" class="w-12 h-12 mx-auto text-stone-300 mb-4"></i><h3 class="font-bold text-lg">Список пуст</h3><p class="text-sm text-stone-500 mt-2 mb-4">Нажимайте сердечко на товарах, чтобы сохранять их здесь.</p><a href="index.html#catalog" class="text-black font-semibold border-b border-black pb-0.5">В каталог</a></div>'; 
-    lucide.createIcons();
-    return; 
+  cnt.textContent = wl.length ? `Сохранено ${wl.length} товаров` : 'Ваши избранные товары';
+
+  if (!wl.length) {
+    c.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">♡</div>
+      <div class="empty-title">Список пуст</div>
+      <div class="empty-desc">Нажимайте сердечко на товарах, чтобы сохранять их</div>
+      <a href="index.html#arrivals" class="empty-link">В каталог</a>
+    </div>`;
+    return;
   }
-  
+
   c.innerHTML = wl.map(p => `
-    <div class="wl-card shadow-sm border border-stone-100 group">
-      <div class="wl-img bg-stone-50">${EMOJIS[p.cat]||'✨'}</div>
-      <button class="wl-remove shadow-md opacity-100 md:opacity-0 group-hover:opacity-100 transition" onclick="removeWish('${p.id}',event)">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-      <div class="wl-body">
-        <div class="text-[10px] uppercase tracking-widest text-stone-500 font-bold mb-1">${p.brand}</div>
-        <div class="text-[13px] font-medium leading-tight mb-2 h-8 overflow-hidden text-[#1C1C1E]">${p.name}</div>
-        <div class="font-bold text-[15px]">₸ ${(Number(p.price)||0).toLocaleString('ru-KZ')}</div>
-        <button onclick="toast('Товар добавлен в корзину')" class="w-full mt-3 bg-black text-white py-2 rounded-lg text-[12px] font-semibold hover:bg-stone-800 transition">В корзину</button>
+    <div class="wish-card">
+      <div class="wish-card-img">${EMOJIS[p.cat] || '✨'}</div>
+      <button class="wish-card-remove" onclick="removeWish('${p.id}',event)" aria-label="Удалить из избранного">✕</button>
+      <div class="wish-card-body">
+        <div class="wish-card-brand">${p.brand}</div>
+        <div class="wish-card-name">${p.name}</div>
+        <div class="wish-card-price">₸ ${(Number(p.price) || 0).toLocaleString('ru-KZ')}</div>
+        <button class="wish-cart-btn" onclick="toast('Товар добавлен в корзину')">В корзину</button>
       </div>
     </div>
   `).join('');
-  lucide.createIcons();
 }
 
-async function removeWish(id,ev){ 
-  ev.stopPropagation(); 
-  await toggleWishlist(currentUser.id,id); 
-  await Promise.all([renderWishlist(), updateBadges()]); 
-  toast('Удалено из избранного'); 
+async function removeWish(id, ev) {
+  ev.stopPropagation();
+  await toggleWishlist(currentUser.id, id);
+  await Promise.all([renderWishlist(), updateBadges()]);
+  toast('Удалено из избранного');
 }
 
-// ── Addresses ─────────────────────────────
-async function renderAddresses(){
+// ═══ Addresses ══════════════════════════
+async function renderAddresses() {
   const list = document.getElementById('addrList');
   const addrsAll = await getAddressesByUser(currentUser.id);
   const addrs = Array.isArray(addrsAll) ? addrsAll : [];
-  if(!addrs.length){ 
-    list.innerHTML = '<div class="text-center py-10 bg-stone-50 rounded-2xl border border-stone-100"><i data-lucide="map" class="w-12 h-12 mx-auto text-stone-300 mb-4"></i><h3 class="font-bold text-lg">Нет адресов</h3><p class="text-sm text-stone-500 mt-2">Добавьте адрес для быстрого оформления.</p></div>'; 
-    lucide.createIcons();
-    return; 
+
+  if (!addrs.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📍</div>
+      <div class="empty-title">Нет адресов</div>
+      <div class="empty-desc">Добавьте адрес для быстрого оформления</div>
+    </div>`;
+    return;
   }
+
   list.innerHTML = addrs.map(a => `
-  <div class="bg-white border-2 ${a.is_default ? 'border-black' : 'border-stone-100'} rounded-2xl p-5 relative group">
-    <div class="flex items-center gap-3 mb-2">
-      <h4 class="font-bold text-lg uppercase tracking-wider text-[11px] text-stone-500">${a.label||'Адрес'}</h4>
-      ${a.is_default ? '<span class="bg-black text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Основной</span>' : ''}
+    <div class="addr-card ${a.is_default ? 'default-addr' : ''}">
+      <div class="addr-label">
+        ${a.label || 'Адрес'}
+        ${a.is_default ? '<span class="addr-default-tag">Основной</span>' : ''}
+      </div>
+      <div class="addr-name">${a.recipient_name} · <span style="font-weight:400;color:var(--lm-warm-taupe)">${a.recipient_phone}</span></div>
+      <div class="addr-detail">${a.city}, ${a.street}${a.apartment ? ', ' + a.apartment : ''}</div>
+      ${a.delivery_notes ? `<div class="addr-notes">${a.delivery_notes}</div>` : ''}
+      <div class="addr-actions">
+        <button class="addr-edit" onclick="openAddrModal('${a.id}')" aria-label="Редактировать">✎</button>
+        <button class="addr-delete" onclick="delAddr('${a.id}')" aria-label="Удалить">✕</button>
+      </div>
     </div>
-    <p class="font-semibold text-[15px] text-[#1C1C1E] mb-1">${a.recipient_name} · <span class="font-normal text-stone-500">${a.recipient_phone}</span></p>
-    <p class="text-[14px] text-stone-600 mb-1">${a.city}, ${a.street}${a.apartment ? ', '+a.apartment : ''}</p>
-    ${a.delivery_notes ? `<p class="text-[12px] text-stone-400 mt-2 italic">${a.delivery_notes}</p>` : ''}
-    
-    <div class="absolute top-4 right-4 flex gap-2">
-      <button onclick="openAddrModal('${a.id}')" class="w-8 h-8 flex items-center justify-center bg-stone-50 border border-stone-200 rounded-full hover:bg-stone-200 transition text-stone-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-      <button onclick="delAddr('${a.id}')" class="w-8 h-8 flex items-center justify-center bg-red-50 border border-red-100 rounded-full hover:bg-red-500 hover:text-white transition text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-    </div>
-  </div>`).join('');
-  lucide.createIcons();
+  `).join('');
 }
 
 let editAddrId = null;
-async function openAddrModal(id){
+async function openAddrModal(id) {
   editAddrId = id;
-  if(id){
+  if (id) {
     const addrs = await getAddressesByUser(currentUser.id);
-    const a = Array.isArray(addrs) ? addrs.find(x=>x.id===id) : null;
-    if(!a) return;
+    const a = Array.isArray(addrs) ? addrs.find(x => x.id === id) : null;
+    if (!a) return;
     document.getElementById('addrModalTitle').textContent = 'Редактировать адрес';
     document.getElementById('aId').value = id;
-    document.getElementById('aLabel').value = a.label||'';
-    document.getElementById('aName').value = a.recipient_name||'';
-    document.getElementById('aPhone').value = a.recipient_phone||'';
-    document.getElementById('aCity').value = a.city||'';
-    document.getElementById('aStreet').value = a.street||'';
-    document.getElementById('aApt').value = a.apartment||'';
-    document.getElementById('aPostal').value = a.postal_code||'';
-    document.getElementById('aNotes').value = a.delivery_notes||'';
+    document.getElementById('aLabel').value = a.label || '';
+    document.getElementById('aName').value = a.recipient_name || '';
+    document.getElementById('aPhone').value = a.recipient_phone || '';
+    document.getElementById('aCity').value = a.city || '';
+    document.getElementById('aStreet').value = a.street || '';
+    document.getElementById('aApt').value = a.apartment || '';
+    document.getElementById('aPostal').value = a.postal_code || '';
+    document.getElementById('aNotes').value = a.delivery_notes || '';
     document.getElementById('aDefault').checked = a.is_default;
   } else {
     document.getElementById('addrModalTitle').textContent = 'Новый адрес';
-    ['aId','aLabel','aName','aPhone','aCity','aStreet','aApt','aPostal','aNotes'].forEach(x=>document.getElementById(x).value='');
+    ['aId','aLabel','aName','aPhone','aCity','aStreet','aApt','aPostal','aNotes'].forEach(x => document.getElementById(x).value = '');
     document.getElementById('aDefault').checked = false;
   }
   document.getElementById('addrModal').classList.add('open');
 }
-function closeAddrModal(){ document.getElementById('addrModal').classList.remove('open'); }
-async function saveAddrModal(){
+
+function closeAddrModal() { document.getElementById('addrModal').classList.remove('open'); }
+
+async function saveAddrModal() {
   const n = document.getElementById('aName').value.trim();
   const c = document.getElementById('aCity').value.trim();
   const s = document.getElementById('aStreet').value.trim();
-  if(!n||!c||!s){ toast('Заполните обязательные поля'); return; }
-  const r = await saveAddress({id:editAddrId||null, user_id:currentUser.id, label:document.getElementById('aLabel').value.trim()||'Дом', recipient_name:n, recipient_phone:document.getElementById('aPhone').value.trim(), country:'Казахстан', city:c, street:s, apartment:document.getElementById('aApt').value.trim(), postal_code:document.getElementById('aPostal').value.trim(), delivery_notes:document.getElementById('aNotes').value.trim(), is_default:document.getElementById('aDefault').checked});
-  if(r&&r.error){ toast(r.error, 'x', 'red-400'); return; }
-  closeAddrModal(); await renderAddresses(); toast('Адрес сохранён', 'check', 'green-400');
-}
-async function delAddr(id){ 
-  if(confirm('Удалить адрес?')){ 
-    const r=await deleteAddress(id); 
-    if(r&&r.error){ toast(r.error, 'x', 'red-400'); return; }
-    await renderAddresses(); 
-    toast('Адрес удалён'); 
-  } 
+  if (!n || !c || !s) { toast('Заполните обязательные поля', 'error'); return; }
+
+  const r = await saveAddress({
+    id: editAddrId || null,
+    user_id: currentUser.id,
+    label: document.getElementById('aLabel').value.trim() || 'Дом',
+    recipient_name: n,
+    recipient_phone: document.getElementById('aPhone').value.trim(),
+    country: 'Казахстан',
+    city: c,
+    street: s,
+    apartment: document.getElementById('aApt').value.trim(),
+    postal_code: document.getElementById('aPostal').value.trim(),
+    delivery_notes: document.getElementById('aNotes').value.trim(),
+    is_default: document.getElementById('aDefault').checked
+  });
+
+  if (r && r.error) { toast(r.error, 'error'); return; }
+  closeAddrModal();
+  await renderAddresses();
+  toast('Адрес сохранён', 'success');
 }
 
-// ── Password ───────────────────────────────
-async function changePassword(e){
+async function delAddr(id) {
+  if (confirm('Удалить адрес?')) {
+    const r = await deleteAddress(id);
+    if (r && r.error) { toast(r.error, 'error'); return; }
+    await renderAddresses();
+    toast('Адрес удалён');
+  }
+}
+
+// ═══ Password ═══════════════════════════
+async function changePassword(e) {
   e.preventDefault();
   const old = document.getElementById('passOld').value;
   const nw = document.getElementById('passNew').value;
   const nw2 = document.getElementById('passNew2').value;
   const err = document.getElementById('passErr');
-  
-  if(!old){ err.textContent='Введите текущий пароль'; err.classList.remove('hidden'); return; }
-  if(nw.length < 6){ err.textContent='Новый пароль: минимум 6 символов'; err.classList.remove('hidden'); return; }
-  if(nw !== nw2){ err.textContent='Пароли не совпадают'; err.classList.remove('hidden'); return; }
-  
-  err.classList.add('hidden');
-  
-  // In GitHub Pages demo mode - simple password update
+
+  if (!old) { err.textContent = 'Введите текущий пароль'; err.style.display = 'block'; return; }
+  if (nw.length < 6) { err.textContent = 'Новый пароль: минимум 6 символов'; err.style.display = 'block'; return; }
+  if (nw !== nw2) { err.textContent = 'Пароли не совпадают'; err.style.display = 'block'; return; }
+
+  err.style.display = 'none';
+
   if (window.IS_GITHUB_PAGES || location.hostname.includes('github.io')) {
     const users = JSON.parse(localStorage.getItem('lm_mock_users') || '[]');
     const idx = users.findIndex(u => u.id === currentUser.id);
-    if (idx === -1) { err.textContent='Пользователь не найден'; err.classList.remove('hidden'); return; }
-    if (users[idx]._pass !== old) { err.textContent='Неверный текущий пароль'; err.classList.remove('hidden'); return; }
+    if (idx === -1) { err.textContent = 'Пользователь не найден'; err.style.display = 'block'; return; }
+    if (users[idx]._pass !== old) { err.textContent = 'Неверный текущий пароль'; err.style.display = 'block'; return; }
     users[idx]._pass = nw;
     localStorage.setItem('lm_mock_users', JSON.stringify(users));
   } else {
     const r = await api('PUT', '/auth/password', { old_password: old, new_password: nw });
-    if(r && r.error){ err.textContent=r.error; err.classList.remove('hidden'); return; }
+    if (r && r.error) { err.textContent = r.error; err.style.display = 'block'; return; }
   }
-  
+
   document.getElementById('passOld').value = '';
   document.getElementById('passNew').value = '';
   document.getElementById('passNew2').value = '';
-  
-  toast('Пароль успешно изменен', 'lock', 'blue-400');
+  toast('Пароль успешно обновлён', 'success');
 }
 
-// ── Auth ───────────────────────────────────
-async function doLogin(){
-  const r = await login(document.getElementById('lwEmail').value.trim(), document.getElementById('lwPass').value);
-  if(r.error){ const e=document.getElementById('lwErr'); e.textContent=r.error; e.classList.add('show'); return; }
-  currentUser = r.user; 
-  init();
-}
-function doLogout(){ logout(); currentUser=null; init(); }
-document.getElementById('lwPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+// ═══ Auth ════════════════════════════════
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Входим...';
 
-function confirmDelete(){
-  if(confirm('Удалить аккаунт? Все данные будут стёрты безвозвратно!')){
-    logout(); toast('Аккаунт удалён'); setTimeout(()=>window.location='index.html',1500);
+  try {
+    const r = await login(
+      document.getElementById('lwEmail').value.trim(),
+      document.getElementById('lwPass').value
+    );
+    if (r.error) {
+      const e = document.getElementById('lwErr');
+      e.textContent = r.error;
+      e.classList.add('show');
+      return;
+    }
+    currentUser = r.user;
+    init();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Войти';
   }
 }
 
-// ── Toast ──────────────────────────────────
-function toast(msg, iconName='info', colorClass=''){
+function doLogout() {
+  logout();
+  currentUser = null;
+  init();
+}
+
+function confirmDelete() {
+  if (confirm('Удалить аккаунт? Все данные будут стёрты безвозвратно!')) {
+    logout();
+    toast('Аккаунт удалён');
+    setTimeout(() => window.location = 'index.html', 1500);
+  }
+}
+
+// ═══ Toast ═══════════════════════════════
+function toast(msg, type) {
   const t = document.createElement('div');
-  t.className = 'tk';
-  
-  // Создаем иконку lucide динамически через innerHTML
-  // Tailwind цвет можем прокинуть через class
-  t.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5 text-${colorClass||'white'}"></i> <span>${msg}</span>`;
-  
-  document.getElementById('toastContainer').appendChild(t);
-  lucide.createIcons({root: t});
-  
-  setTimeout(() => { 
-    t.style.opacity = '0'; 
-    t.style.transform = window.innerWidth < 768 ? 'translateY(100px)' : 'translateY(-20px)'; 
-    t.style.transition = '.3s ease'; 
-    setTimeout(() => t.remove(), 400); 
+  t.className = 'toast-item';
+  const icons = { success: '✓', error: '✕', info: '✦' };
+  t.innerHTML = `<span>${icons[type] || '✦'}</span> ${msg}`;
+  document.getElementById('toastStack').appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(20px)';
+    t.style.transition = '.3s ease';
+    setTimeout(() => t.remove(), 350);
   }, 2800);
 }
 
-// Close modals
-document.getElementById('addrModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeAddrModal(); });
+// ═══ Keyboard shortcuts ═════════════════
+document.getElementById('lwPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('lwEmail').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('addrModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddrModal(); });
 
-// Сразу запускаем
+// Handle Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeAddrModal();
+  }
+});
+
+// ═══ Mobile responsive ══════════════════
+function handleResize() {
+  const w = window.innerWidth;
+  if (w > 768) {
+    const grid = document.getElementById('mainGrid');
+    grid.classList.remove('mobile-menu', 'mobile-content');
+    document.getElementById('mobileBackBar').style.display = 'none';
+  }
+}
+window.addEventListener('resize', handleResize);
+
+// ═══ Start ══════════════════════════════
+loadRoutineState();
 init();
+
+console.log('%c✦ LUMIÈRE Profile', 'font-family:serif;font-size:18px;color:#E7C9BE');
+console.log('%c"Digital Sanctuary" — 2026 Edition', 'font-size:11px;color:#8B7355');
 </script>
 </body>
 </html>
